@@ -1,58 +1,96 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+  <el-tree
+    :data="data"
+    node-key="id"
+    default-expand-all
+    draggable
+    :allow-drop="allowDrop"
+    :allow-drag="allowDrag"
+    @node-drag-start="handleDragStart"
+  />
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String,
+  data() {
+    return {
+      data: [
+        {
+          id: 1,
+          label: 'mathout 算子',
+          children: [
+            {
+              id: 4,
+              label: '分类',
+              children: [
+                {
+                  id: 9,
+                  label: '朴素贝叶斯',
+                },
+                {
+                  id: 10,
+                  label: '逻辑回归',
+                },
+              ],
+            },
+            {
+              id: 2,
+              label: '聚类',
+              children: [
+                {
+                  id: 5,
+                  label: 'K均值',
+                },
+                {
+                  id: 6,
+                  label: 'Canopy算法',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 2,
+          label: '预处理',
+          children: [
+            {
+              id: 5,
+              label: '采样',
+            },
+            {
+              id: 6,
+              label: '特征选择',
+            },
+          ],
+        },
+        {
+          id: 3,
+          label: '后处理',
+          children: [
+            {
+              id: 7,
+              label: '合并数据源和结果数据',
+            },
+          ],
+        },
+      ],
+      defaultProps: {
+        children: 'children',
+        label: 'label',
+      },
+    }
   },
-};
+  methods: {
+    handleDragStart(node, ev) {
+      console.log('drag start', node)
+      window.draggingNode = node
+    },
+    allowDrop(draggingNode, dropNode, type) {
+      return false
+    },
+    allowDrag(draggingNode) {
+      return draggingNode.isLeaf
+    },
+  },
+}
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
