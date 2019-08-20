@@ -25,6 +25,18 @@
       @dragover.stop="dragover_handler"
       @drop.stop="drop_handler"
     />
+    <div>
+      <el-drawer
+        title="属性查看"
+        :visible.sync="drawerVisible"
+        :modal="false"
+        size="50%"
+        :modal-append-to-body="false"
+        :close-on-press-escape="false"
+      >
+        <pre>{{ drawerContent }}</pre>
+      </el-drawer>
+    </div>
   </div>
 </template>
 <script>
@@ -48,6 +60,8 @@ export default {
       eventBus: null,
       canvas: null,
       processName: '',
+      drawerVisible: false,
+      drawerContent: undefined,
     }
   },
   computed: {
@@ -102,8 +116,17 @@ export default {
     this.commandStack = this.bpmnModeler.get('commandStack')
     this.canvas = this.bpmnModeler.get('canvas')
     this.eventBus = this.bpmnModeler.get('eventBus')
-    this.eventBus.on('element.dblclick', 10000, function(event) {
-      return false // will cancel event
+    // TODO: bpmn:DataStoreReference
+    let ignoreList = ['bpmn:SequenceFlow', 'label']
+    this.eventBus.on('element.dblclick', 10000, event => {
+      // return false // will cancel event
+      let el = event.element
+      if (ignoreList.indexOf(el.type) === -1) {
+        this.drawerContent = el.businessObject
+        console.log(el)
+        this.drawerVisible = true
+      }
+      return false
     })
   },
   methods: {
@@ -124,7 +147,7 @@ export default {
       // cli.create('bpmn:EndEvent', { x: rx, y: ry }, 'Process_1')
       let viewbox = this.canvas.viewbox()
       let task = this.cli.create(
-        'bpmn:Task',
+        'bpmn:ScriptTask',
         {
           x: rx + viewbox.x,
           y: ry + viewbox.y,
