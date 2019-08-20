@@ -16,7 +16,7 @@
       重做
     </el-button>
     <el-button @click="modify">
-      修改标题
+      修改测试
     </el-button>
     <div
       ref="content"
@@ -30,7 +30,7 @@
         title="属性查看"
         :visible.sync="drawerVisible"
         :modal="false"
-        size="50%"
+        size="35%"
         :modal-append-to-body="false"
         :close-on-press-escape="false"
       >
@@ -41,14 +41,13 @@
 </template>
 <script>
 // 引入相关的依赖
-// import BpmnViewer from 'bpmn-js'
 import BpmnModeler from 'bpmn-js/lib/Modeler'
+// 控制台工具
 import CliModule from 'bpmn-js-cli'
+// 默认载入的 BPMN
 import diagramXML from '../../resources/diagram.bpmn'
-
-// import propertiesPanelModule from 'bpmn-js-properties-panel'
-// import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda'
-// import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda'
+// 自定义模块
+import CustomModule from './module'
 
 export default {
   data() {
@@ -59,7 +58,6 @@ export default {
       commandStack: null,
       eventBus: null,
       canvas: null,
-      processName: '',
       drawerVisible: false,
       drawerContent: undefined,
     }
@@ -76,48 +74,27 @@ export default {
     },
   },
   mounted() {
-    function CustomContextPadProvider(contextPad) {
-      contextPad.registerProvider(this)
-
-      this.getContextPadEntries = function(element) {
-        // no entries, effectively disable the context pad
-        return {}
-      }
-    }
-    CustomContextPadProvider.$inject = ['contextPad']
     this.bpmnModeler = new BpmnModeler({
+      // 容器
       container: this.$refs.content,
-      // 左边工具栏以及节点
-      // 右边的工具栏
-      additionalModules: [
-        CliModule,
-        // overrideModule,
-        {
-          // moveCanvas: ['value', ''],
-          zoomScroll: ['value', ''],
-          // contextPadProvider: ['value', ''],
-        },
-      ],
-      // 节点的扩展显示
-      // moddleExtensions: {
-      //   qa: qaExtension,
-      // },
+      // 模块
+      additionalModules: [CliModule, CustomModule],
       cli: {
         bindTo: 'cli',
       },
     })
-    // import XML
+    // 导入
     this.bpmnModeler.importXML(diagramXML, err => {
       if (err) {
         console.error(err)
       }
     })
+
     this.modeling = this.bpmnModeler.get('modeling')
     this.commandStack = this.bpmnModeler.get('commandStack')
     this.canvas = this.bpmnModeler.get('canvas')
     this.eventBus = this.bpmnModeler.get('eventBus')
-    // TODO: bpmn:DataStoreReference
-    let ignoreList = ['bpmn:SequenceFlow', 'label']
+    let ignoreList = ['bpmn:Process', 'bpmn:SequenceFlow', 'label']
     this.eventBus.on('element.dblclick', 10000, event => {
       // return false // will cancel event
       let el = event.element
@@ -132,39 +109,40 @@ export default {
   methods: {
     dragover_handler(ev) {
       ev.preventDefault()
-      // Set the dropEffect to move
-      //  ev.dataTransfer.dropEffect = "move"
     },
     drop_handler(ev) {
       ev.preventDefault()
-      // Get the id of the target and add the moved element to the target's DOM
-      //  var data = ev.dataTransfer.getData("text");
-      //  ev.target.appendChild(document.getElementById(data));
-      let rx = ev.offsetX
-      let ry = ev.offsetY
-      // debugger
-      // console.log('dropped', rx, ry)
-      // cli.create('bpmn:EndEvent', { x: rx, y: ry }, 'Process_1')
+      let node = window.draggingNode
+      if (!node) {
+        return
+      }
       let viewbox = this.canvas.viewbox()
-      let task = this.cli.create(
-        'bpmn:ScriptTask',
+      let id = this.cli.create(
+        node.data.type,
         {
-          x: rx + viewbox.x,
-          y: ry + viewbox.y,
+          x: ev.offsetX + viewbox.x,
+          y: ev.offsetY + viewbox.y,
         },
         'Process_1'
       )
-      this.cli.setLabel(task, window.draggingNode.data.label)
+      this.cli.setLabel(id, node.data.label)
+      // 这样会导致一条历史记录，因此直接修改对象的 name, need fix
+      // let el = this.cli.element(id)
+      // el.businessObject.name = node.data.label
+      // this.eventBus.fire('commandStack.element.updateLabel.execute', {
+      //   element: el,
+      // })
+      // console.log(el)
+      // console.log(el.businessObject)
+      window.draggingNode = null
     },
     modify() {
       let obj = this.cli.element('StartEvent_1')
-      // this.cli.element('StartEvent_1').businessObject.name = 'fun'
       this.modeling.updateProperties(obj, { name: 'lol' })
-      window.canvas = this.canvas
+      // obj.name = 'lol'
     },
     save() {
       this.bpmnModeler.saveXML({ format: true }, (err, xml) => {
-        // log the current xml content to the browser console
         if (err) {
           console.log(err)
         } else {
@@ -183,11 +161,12 @@ export default {
 }
 </script>
 <style lang="css">
-/*左边工具栏以及编辑节点的样式*/
+/* 默认样式 */
 @import '~bpmn-js/dist/assets/diagram-js.css';
-@import '~bpmn-js/dist/assets/bpmn-font/css/bpmn.css';
+/* @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn.css'; */
 /* @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css'; */
 @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
+/* 禁用logo */
 .bjs-powered-by {
   display: none;
 }

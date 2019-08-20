@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "bpmn-js": "^4.0.3",
+    "diagram-js": "^5.0.0",
     "bpmn-js-cli": "^1.0.0",
     "core-js": "^2.6.5",
     "element-ui": "^2.11.0",

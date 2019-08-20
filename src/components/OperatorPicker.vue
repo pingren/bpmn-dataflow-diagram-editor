@@ -82,7 +82,7 @@ export default {
   },
   methods: {
     handleDragStart(node, ev) {
-      console.log('drag start', node)
+      node.data.type = 'bpmn:ScriptTask'
       window.draggingNode = node
     },
     allowDrop(draggingNode, dropNode, type) {

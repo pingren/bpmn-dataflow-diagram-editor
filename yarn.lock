@@ -2877,6 +2877,21 @@ diagram-js@^4.0.2:
     path-intersection "^1.0.2"
     tiny-svg "^2.2.1"
 
+diagram-js@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npm.taobao.org/diagram-js/download/diagram-js-5.0.0.tgz#cb4a0a49dc5492ada70500151fd81b6982c1155c"
+  integrity sha1-y0oKSdxUkq2nBQAVH9gbaYLBFVw=
+  dependencies:
+    css.escape "^1.5.1"
+    didi "^4.0.0"
+    hammerjs "^2.0.1"
+    inherits "^2.0.1"
+    min-dash "^3.5.0"
+    min-dom "^3.0.0"
+    object-refs "^0.3.0"
+    path-intersection "^1.0.2"
+    tiny-svg "^2.2.1"
+
 didi@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npm.taobao.org/didi/download/didi-4.0.0.tgz#2b89d892a67fd3777f7642d3bf06697b69e9b622"
