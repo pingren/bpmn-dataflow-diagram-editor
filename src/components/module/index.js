@@ -1,17 +1,10 @@
 import InteractionEvents from './InteractionEvents'
-
-function CustomContextPadProvider(contextPad) {
-  contextPad.registerProvider(this)
-
-  this.getContextPadEntries = function(element) {
-    // no entries, effectively disable the context pad
-    return {}
-  }
-}
-CustomContextPadProvider.$inject = ['contextPad']
+import ContextPadProvider from './ContextPadProvider'
 
 export default {
   __init__: ['interactionEvents'],
+  // context 面板
+  contextPadProvider: ['type', ContextPadProvider],
   // label 拖动禁用
   interactionEvents: ['type', InteractionEvents],
   // label 编辑禁用
@@ -21,8 +14,6 @@ export default {
   paletteProvider: ['value', ''],
   // 滚轮禁用
   zoomScroll: ['value', ''],
-  // context 面板禁用
-  // contextPadProvider: ['value', ''],
   // 画布拖动禁用
   // moveCanvas: ['value', ''],
 }
