@@ -1692,6 +1692,15 @@ bpmn-js-cli@^1.0.0:
   dependencies:
     min-dash "^3.1.0"
 
+bpmn-js-token-simulation@^0.8.1:
+  version "0.8.1"
+  resolved "https://registry.npm.taobao.org/bpmn-js-token-simulation/download/bpmn-js-token-simulation-0.8.1.tgz#ca8f4a1ed9b4622a30b0e4626d9d9c868af2b2a0"
+  integrity sha1-yo9KHtm0YiowsORibZ2chorysqA=
+  dependencies:
+    min-dash "^3.3.0"
+    min-dom "^0.2.0"
+    svg.js "^2.6.3"
+
 bpmn-js@^4.0.3:
   version "4.0.3"
   resolved "https://registry.npm.taobao.org/bpmn-js/download/bpmn-js-4.0.3.tgz#c599a53441a32b870cf3e6fcdd74e189df8cd4e4"
@@ -2252,6 +2261,35 @@ commondir@^1.0.1:
   resolved "https://registry.npm.taobao.org/commondir/download/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"
   integrity sha1-3dgA2gxmEnOTzKWVDqloo6rxJTs=
 
+component-classes@^1.2.3:
+  version "1.2.6"
+  resolved "https://registry.npm.taobao.org/component-classes/download/component-classes-1.2.6.tgz#c642394c3618a4d8b0b8919efccbbd930e5cd691"
+  integrity sha1-xkI5TDYYpNiwuJGe/Mu9kw5c1pE=
+  dependencies:
+    component-indexof "0.0.3"
+
+component-closest@*:
+  version "1.0.1"
+  resolved "https://registry.npm.taobao.org/component-closest/download/component-closest-1.0.1.tgz#1ed0464132fc88a3510a2dabec079695789fb1b5"
+  integrity sha1-HtBGQTL8iKNRCi2r7AeWlXifsbU=
+  dependencies:
+    component-matches-selector "~0.1.6"
+
+component-closest@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.npm.taobao.org/component-closest/download/component-closest-0.1.4.tgz#5b72fc52d90607e75115cafdc3b07e27348de71b"
+  integrity sha1-W3L8UtkGB+dRFcr9w7B+JzSN5xs=
+  dependencies:
+    component-matches-selector "~0.1.5"
+
+component-delegate@^0.2.3:
+  version "0.2.4"
+  resolved "https://registry.npm.taobao.org/component-delegate/download/component-delegate-0.2.4.tgz#dc5028759ea681bea84a3d6bbd650207c3beb138"
+  integrity sha1-3FAodZ6mgb6oSj1rvWUCB8O+sTg=
+  dependencies:
+    component-closest "*"
+    component-event "*"
+
 component-emitter@^1.2.1:
   version "1.3.0"
   resolved "https://registry.npm.taobao.org/component-emitter/download/component-emitter-1.3.0.tgz#16e4070fba8ae29b679f2215853ee181ab2eabc0"
@@ -2266,6 +2304,24 @@ component-event@^0.1.4:
   version "0.1.4"
   resolved "https://registry.npm.taobao.org/component-event/download/component-event-0.1.4.tgz#3de78fc28782381787e24bf2a7c536bf0142c9b4"
   integrity sha1-PeePwoeCOBeH4kvyp8U2vwFCybQ=
+
+component-indexof@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.npm.taobao.org/component-indexof/download/component-indexof-0.0.3.tgz#11d091312239eb8f32c8f25ae9cb002ffe8d3c24"
+  integrity sha1-EdCRMSI5648yyPJa6csAL/6NPCQ=
+
+component-matches-selector@^0.1.5, component-matches-selector@~0.1.5, component-matches-selector@~0.1.6:
+  version "0.1.7"
+  resolved "https://registry.npm.taobao.org/component-matches-selector/download/component-matches-selector-0.1.7.tgz#3098309e43f42b06a13d638c9648998ceab23b69"
+  integrity sha1-MJgwnkP0KwahPWOMlkiZjOqyO2k=
+  dependencies:
+    component-query "*"
+    global-object "^1.0.0"
+
+component-query@*, component-query@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.npm.taobao.org/component-query/download/component-query-0.0.3.tgz#07f49dab7071fa9606725df53e607f468acdaacf"
+  integrity sha1-B/Sdq3Bx+pYGcl31PmB/RorNqs8=
 
 compressible@~2.0.16:
   version "2.0.17"
@@ -4023,6 +4079,11 @@ glob@^7.0.3, glob@^7.1.2, glob@^7.1.3, glob@^7.1.4:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
+global-object@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npm.taobao.org/global-object/download/global-object-1.0.0.tgz#2a1b45e901d55e4773154f12f0cec1ef9aba5f9f"
+  integrity sha1-KhtF6QHVXkdzFU8S8M7B75q6X58=
+
 globals@^11.0.1, globals@^11.1.0, globals@^11.7.0:
   version "11.12.0"
   resolved "https://registry.npm.taobao.org/globals/download/globals-11.12.0.tgz?cache=0&sync_timestamp=1563721993391&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fglobals%2Fdownload%2Fglobals-11.12.0.tgz#ab8795338868a0babd8525758018c2a7eb95c42e"
@@ -5348,6 +5409,24 @@ min-dash@^3.0.0, min-dash@^3.1.0, min-dash@^3.5.0:
   version "3.5.0"
   resolved "https://registry.npm.taobao.org/min-dash/download/min-dash-3.5.0.tgz#9828e9596946ca60b79f06bc4db6a5c324e29ffd"
   integrity sha1-mCjpWWlGymC3nwa8TbalwyTin/0=
+
+min-dash@^3.3.0:
+  version "3.5.1"
+  resolved "https://registry.npm.taobao.org/min-dash/download/min-dash-3.5.1.tgz#0fdd41afe8f538340ec3c57acaf7c1277bd2f838"
+  integrity sha1-D91Br+j1ODQOw8V6yvfBJ3vS+Dg=
+
+min-dom@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.npm.taobao.org/min-dom/download/min-dom-0.2.0.tgz#7f1a3f8ac85c05adee7b3f40e00c52803075cd5d"
+  integrity sha1-fxo/ishcBa3uez9A4AxSgDB1zV0=
+  dependencies:
+    component-classes "^1.2.3"
+    component-closest "^0.1.4"
+    component-delegate "^0.2.3"
+    component-event "^0.1.4"
+    component-matches-selector "^0.1.5"
+    component-query "^0.0.3"
+    domify "^1.3.1"
 
 min-dom@^3.0.0:
   version "3.1.1"
@@ -7797,6 +7876,11 @@ svg-tags@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npm.taobao.org/svg-tags/download/svg-tags-1.0.0.tgz#58f71cee3bd519b59d4b2a843b6c7de64ac04764"
   integrity sha1-WPcc7jvVGbWdSyqEO2x95krAR2Q=
+
+svg.js@^2.6.3:
+  version "2.7.1"
+  resolved "https://registry.npm.taobao.org/svg.js/download/svg.js-2.7.1.tgz#eb977ed4737001eab859949b4a398ee1bb79948d"
+  integrity sha1-65d+1HNwAeq4WZSbSjmO4bt5lI0=
 
 svgo@^1.0.0:
   version "1.3.0"

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <span>双击节点查看属性</span>
     <el-button @click="save">
       保存
     </el-button>
@@ -16,7 +17,7 @@
       重做
     </el-button>
     <el-button @click="modify">
-      修改测试
+      修改属性（标题）测试
     </el-button>
     <div
       ref="content"
@@ -44,10 +45,14 @@
 import BpmnModeler from 'bpmn-js/lib/Modeler'
 // 控制台工具
 import CliModule from 'bpmn-js-cli'
+
 // 默认载入的 BPMN
 import diagramXML from '../../resources/diagram.bpmn'
 // 自定义模块
 import CustomModule from './module'
+// token 动画
+import tokenSimulation from 'bpmn-js-token-simulation/lib/viewer'
+// var tokenSimulation = require('./lib/modeler')
 
 export default {
   data() {
@@ -78,7 +83,7 @@ export default {
       // 容器
       container: this.$refs.content,
       // 模块
-      additionalModules: [CliModule, CustomModule],
+      additionalModules: [CliModule, CustomModule, tokenSimulation],
       cli: {
         bindTo: 'cli',
       },
@@ -125,13 +130,13 @@ export default {
         },
         'Process_1'
       )
-      this.cli.setLabel(id, node.data.label)
+      // this.cli.setLabel(id, node.data.label)
       // 这样会导致一条历史记录，因此直接修改对象的 name, need fix
-      // let el = this.cli.element(id)
-      // el.businessObject.name = node.data.label
-      // this.eventBus.fire('commandStack.element.updateLabel.execute', {
-      //   element: el,
-      // })
+      let el = this.cli.element(id)
+      el.businessObject.name = node.data.label
+      this.eventBus.fire('element.changed', {
+        element: el,
+      })
       // console.log(el)
       // console.log(el.businessObject)
       window.draggingNode = null
@@ -147,7 +152,10 @@ export default {
           console.log(err)
         } else {
           console.log(xml)
-          alert(xml)
+          let definitions = this.bpmnModeler.get('canvas').getRootElement()
+            .businessObject.$parent
+          console.log(JSON.stringify(definitions))
+          alert(`查看浏览器控制台~`)
         }
       })
     },
@@ -166,6 +174,8 @@ export default {
 /* @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn.css'; */
 /* @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css'; */
 @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
+@import '~bpmn-js-token-simulation/assets/css/bpmn-js-token-simulation.css';
+/* @import '~bpmn-js-token-simulation/assets/css/normalize.css'; */
 /* 禁用logo */
 .bjs-powered-by {
   display: none;

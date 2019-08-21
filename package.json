@@ -9,9 +9,10 @@
   },
   "dependencies": {
     "bpmn-js": "^4.0.3",
-    "diagram-js": "^5.0.0",
     "bpmn-js-cli": "^1.0.0",
+    "bpmn-js-token-simulation": "^0.8.1",
     "core-js": "^2.6.5",
+    "diagram-js": "^5.0.0",
     "element-ui": "^2.11.0",
     "raw-loader": "^3.1.0",
     "vue": "^2.6.10"

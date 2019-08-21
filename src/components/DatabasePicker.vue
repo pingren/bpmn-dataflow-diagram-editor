@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     handleDragStart(node, ev) {
-      node.data.type = 'bpmn:DataStoreReference'
+      node.data.type = 'bpmn:ServiceTask'
       window.draggingNode = node
     },
     allowDrop(draggingNode, dropNode, type) {
