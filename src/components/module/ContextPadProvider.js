@@ -77,7 +77,6 @@ ContextPadProvider.prototype.getContextPadEntries = function(element) {
   var modeling = this._modeling
   var connect = this._connect
   var rules = this._rules
-  var translate = this._translate
 
   var actions = {}
 
@@ -140,13 +139,14 @@ ContextPadProvider.prototype.getContextPadEntries = function(element) {
       connect: {
         group: 'connect',
         className: 'bpmn-icon-connection-multi',
-        title: translate(
-          'Connect using ' +
-            (businessObject.isForCompensation
-              ? ''
-              : 'Sequence/MessageFlow or ') +
-            'Association'
-        ),
+        // title: translate(
+        //   'Connect using ' +
+        //     (businessObject.isForCompensation
+        //       ? ''
+        //       : 'Sequence/MessageFlow or ') +
+        //     'Association'
+        // ),
+        title: '连接节点',
         action: {
           click: startConnect,
           dragstart: startConnect,
@@ -165,7 +165,8 @@ ContextPadProvider.prototype.getContextPadEntries = function(element) {
       connect: {
         group: 'connect',
         className: 'bpmn-icon-connection-multi',
-        title: translate('Connect using DataInputAssociation'),
+        // title: translate('Connect using DataInputAssociation'),
+        title: '连接节点',
         action: {
           click: startConnect,
           dragstart: startConnect,
@@ -188,7 +189,8 @@ ContextPadProvider.prototype.getContextPadEntries = function(element) {
       delete: {
         group: 'edit',
         className: 'bpmn-icon-trash',
-        title: translate('Remove'),
+        // title: translate('Remove'),
+        title: '删除',
         action: {
           click: removeElement,
         },

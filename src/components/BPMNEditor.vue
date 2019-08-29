@@ -2,7 +2,7 @@
   <div>
     <el-card
       :body-style="{ padding:'5px', }"
-      style="z-index:9;width:auto;left:calc(50% - 240px);position:absolute;"
+      style="z-index:8;width:auto;left:calc(50% - 170px);position:absolute;"
     >
       <el-button
         :disabled="!canUndo"
@@ -137,9 +137,16 @@ export default {
       let el = event.element
       if (ignoreList.indexOf(el.type) === -1) {
         this.$emit('node-click', el.businessObject)
+        return true
       }
       return false
     })
+    // this.eventBus.on('connection.add', 0, event => {
+    //   // return false // will cancel event
+    //   let el = event.element
+    //   console.log(el)
+    //   return false
+    // })
   },
   methods: {
     dragover_handler(ev) {
@@ -160,7 +167,7 @@ export default {
         },
         'Process_1'
       )
-      this.cli.setLabel(id, node.data.label)
+      // this.cli.setLabel(id, node.data.label)
       // TODO: 这样会导致一条历史记录，因此直接修改对象的 name, need fix
       let el = this.cli.element(id)
       el.businessObject.name = node.data.label
@@ -178,18 +185,6 @@ export default {
       // console.log(nodes)
       let elements = this.cli.elements()
       this.animateNext(elements, 0)
-      // elements.forEach((element, index) => {
-      //   let el = this.cli.element(element)
-      //   if (ignoreList.indexOf(el.type) === -1)
-      //     overlays.add(el, {
-      //       position: {
-      //         top: -30,
-      //         right: 0,
-      //       },
-      //       html: '<div class="loader"></div>',
-      //     })
-      //   // overlays.remove({ element: el })
-      // })
     },
     animateNext(elements, index) {
       let element = elements[index]
@@ -208,14 +203,16 @@ export default {
         })
       setTimeout(() => {
         this.overlays.remove({ element: el })
-        this.overlays.add(el, {
-          position: {
-            top: -30,
-            right: 0,
-          },
-          html:
-            '<span class="checkmark"><div class="checkmark_circle"></div><div class="checkmark_stem"></div><div class="checkmark_kick"></div></span>',
-        })
+        if (ignoreList.indexOf(el.type) === -1) {
+          this.overlays.add(el, {
+            position: {
+              top: -30,
+              right: 0,
+            },
+            html:
+              '<span class="checkmark"><div class="checkmark_circle"></div><div class="checkmark_stem"></div><div class="checkmark_kick"></div></span>',
+          })
+        }
         this.animateNext(elements, index + 1)
       }, 2000)
     },
