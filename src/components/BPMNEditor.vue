@@ -1,27 +1,47 @@
 <template>
   <div>
-    <span>双击节点查看属性</span>
-    <el-button @click="save">
-      保存
-    </el-button>
-    <el-button
-      :disabled="!canUndo"
-      @click="undo"
+    <el-card
+      :body-style="{ padding:'5px', }"
+      style="z-index:9;width:auto;left:calc(50% - 240px);position:absolute;"
     >
-      撤销
-    </el-button>
-    <el-button
-      :disabled="!canRedo"
-      @click="redo"
-    >
-      重做
-    </el-button>
-    <el-button @click="modify">
-      修改属性（标题）测试
-    </el-button>
-    <el-button @click="animate">
-      动画测试
-    </el-button>
+      <el-button
+        :disabled="!canUndo"
+        size="mini"
+        icon="el-icon-refresh-left"
+        @click="undo"
+      >
+        撤销
+      </el-button>
+      <el-button
+        :disabled="!canRedo"
+        size="mini"
+        icon="el-icon-refresh-right"
+        @click="redo"
+      >
+        恢复
+      </el-button>
+      <el-button
+        size="mini"
+        icon="el-icon-upload"
+        @click="save"
+      >
+        保存
+      </el-button>
+      <!-- <el-button
+        size="mini"
+        @click="modify"
+      >
+        修改属性（标题）测试
+      </el-button> -->
+      <el-button
+        size="mini"
+        icon="el-icon-video-play"
+        type="primary"
+        @click="animate"
+      >
+        运行
+      </el-button>
+    </el-card>
     <div
       ref="content"
       style="width:100%;height:100%;"
@@ -109,6 +129,14 @@ export default {
         this.drawerContent = el.businessObject
         console.log(el)
         this.drawerVisible = true
+      }
+      return false
+    })
+    this.eventBus.on('element.click', 0, event => {
+      // return false // will cancel event
+      let el = event.element
+      if (ignoreList.indexOf(el.type) === -1) {
+        this.$emit('node-click', el.businessObject)
       }
       return false
     })

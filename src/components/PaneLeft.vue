@@ -24,7 +24,7 @@
         </template>
         <DatabasePicker
           class="submenu"
-          :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(30vh - 35px);'"
+          :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(30vh - 51px);'"
         />
       </el-submenu>
       <el-submenu index="2">
@@ -54,8 +54,7 @@ export default {
   },
   data() {
     return {
-      activeNames: ['1', '2'],
-      isCollapse: true,
+      isCollapse: false,
     }
   },
 }
@@ -63,7 +62,7 @@ export default {
 
 <style scoped>
 .left-pane {
-  position: fixed;
+  position: absolute;
   z-index: 9;
   left: 0;
   top: 0;
@@ -80,5 +79,6 @@ export default {
 }
 .submenu {
   overflow: auto;
+  max-width: 500px;
 }
 </style>
