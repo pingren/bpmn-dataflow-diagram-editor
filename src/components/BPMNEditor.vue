@@ -19,6 +19,9 @@
     <el-button @click="modify">
       修改属性（标题）测试
     </el-button>
+    <el-button @click="animate">
+      动画测试
+    </el-button>
     <div
       ref="content"
       style="width:100%;height:100%;"
@@ -45,14 +48,13 @@
 import BpmnModeler from 'bpmn-js/lib/Modeler'
 // 控制台工具
 import CliModule from 'bpmn-js-cli'
-
 // 默认载入的 BPMN
 import diagramXML from '../../resources/diagram.bpmn'
 // 自定义模块
 import CustomModule from './module'
 // token 动画
-import tokenSimulation from 'bpmn-js-token-simulation/lib/viewer'
-// var tokenSimulation = require('./lib/modeler')
+// import tokenSimulation from 'bpmn-js-token-simulation/lib/viewer'
+let ignoreList = ['bpmn:Process', 'bpmn:SequenceFlow', 'label']
 
 export default {
   data() {
@@ -83,7 +85,7 @@ export default {
       // 容器
       container: this.$refs.content,
       // 模块
-      additionalModules: [CliModule, CustomModule, tokenSimulation],
+      additionalModules: [CliModule, CustomModule],
       cli: {
         bindTo: 'cli',
       },
@@ -98,8 +100,8 @@ export default {
     this.modeling = this.bpmnModeler.get('modeling')
     this.commandStack = this.bpmnModeler.get('commandStack')
     this.canvas = this.bpmnModeler.get('canvas')
+    this.overlays = this.bpmnModeler.get('overlays')
     this.eventBus = this.bpmnModeler.get('eventBus')
-    let ignoreList = ['bpmn:Process', 'bpmn:SequenceFlow', 'label']
     this.eventBus.on('element.dblclick', 10000, event => {
       // return false // will cancel event
       let el = event.element
@@ -130,8 +132,8 @@ export default {
         },
         'Process_1'
       )
-      // this.cli.setLabel(id, node.data.label)
-      // 这样会导致一条历史记录，因此直接修改对象的 name, need fix
+      this.cli.setLabel(id, node.data.label)
+      // TODO: 这样会导致一条历史记录，因此直接修改对象的 name, need fix
       let el = this.cli.element(id)
       el.businessObject.name = node.data.label
       this.eventBus.fire('element.changed', {
@@ -140,6 +142,54 @@ export default {
       // console.log(el)
       // console.log(el.businessObject)
       window.draggingNode = null
+    },
+    animate() {
+      // let nodes = document.querySelectorAll('[data-element-id]')
+      // nodes[2].style.display = 'none'
+      // nodes[2].style.opacity = '0.3'
+      // console.log(nodes)
+      let elements = this.cli.elements()
+      this.animateNext(elements, 0)
+      // elements.forEach((element, index) => {
+      //   let el = this.cli.element(element)
+      //   if (ignoreList.indexOf(el.type) === -1)
+      //     overlays.add(el, {
+      //       position: {
+      //         top: -30,
+      //         right: 0,
+      //       },
+      //       html: '<div class="loader"></div>',
+      //     })
+      //   // overlays.remove({ element: el })
+      // })
+    },
+    animateNext(elements, index) {
+      let element = elements[index]
+      if (element === undefined) {
+        return
+      }
+      let el = this.cli.element(element)
+
+      if (ignoreList.indexOf(el.type) === -1)
+        this.overlays.add(el, {
+          position: {
+            top: -30,
+            right: 0,
+          },
+          html: '<div class="loader"></div>',
+        })
+      setTimeout(() => {
+        this.overlays.remove({ element: el })
+        this.overlays.add(el, {
+          position: {
+            top: -30,
+            right: 0,
+          },
+          html:
+            '<span class="checkmark"><div class="checkmark_circle"></div><div class="checkmark_stem"></div><div class="checkmark_kick"></div></span>',
+        })
+        this.animateNext(elements, index + 1)
+      }, 2000)
     },
     modify() {
       let obj = this.cli.element('StartEvent_1')
@@ -174,10 +224,62 @@ export default {
 /* @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn.css'; */
 /* @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css'; */
 @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
-@import '~bpmn-js-token-simulation/assets/css/bpmn-js-token-simulation.css';
-/* @import '~bpmn-js-token-simulation/assets/css/normalize.css'; */
+/* @import '~bpmn-js-token-simulation/assets/css/bpmn-js-token-simulation.css'; */
 /* 禁用logo */
 .bjs-powered-by {
   display: none;
+}
+.loader {
+  border: 8px solid #f3f3f3; /* Light grey */
+  border-top: 8px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.checkmark {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  -ms-transform: rotate(45deg); /* IE 9 */
+  -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
+  transform: rotate(45deg);
+}
+
+.checkmark_circle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background-color: green;
+  border-radius: 11px;
+  left: 0;
+  top: 0;
+}
+
+.checkmark_stem {
+  position: absolute;
+  width: 3px;
+  height: 9px;
+  background-color: #fff;
+  left: 11px;
+  top: 6px;
+}
+
+.checkmark_kick {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background-color: #fff;
+  left: 8px;
+  top: 12px;
 }
 </style>
