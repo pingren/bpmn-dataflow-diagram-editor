@@ -74,7 +74,13 @@ import diagramXML from '../../resources/diagram.bpmn'
 import CustomModule from './module'
 // token 动画
 // import tokenSimulation from 'bpmn-js-token-simulation/lib/viewer'
-let ignoreList = ['bpmn:Process', 'bpmn:SequenceFlow', 'label']
+let ignoreList = [
+  'bpmn:Process',
+  'bpmn:SequenceFlow',
+  'label',
+  'bpmn:StartEvent',
+  'bpmn:EndEvent',
+]
 
 export default {
   data() {
@@ -171,6 +177,9 @@ export default {
       // TODO: 这样会导致一条历史记录，因此直接修改对象的 name, need fix
       let el = this.cli.element(id)
       el.businessObject.name = node.data.label
+      el.businessObject = Object.assign(el.businessObject, node.data)
+      delete el.businessObject.label
+      console.log(el.businessObject)
       this.eventBus.fire('element.changed', {
         element: el,
       })
@@ -179,11 +188,15 @@ export default {
       window.draggingNode = null
     },
     animate() {
+      this.$emit('run')
       // let nodes = document.querySelectorAll('[data-element-id]')
       // nodes[2].style.display = 'none'
       // nodes[2].style.opacity = '0.3'
       // console.log(nodes)
-      let elements = this.cli.elements()
+      let elements = this.cli
+        .elements()
+        .filter(item => ignoreList.indexOf(this.cli.element(item).type) === -1)
+      console.log(elements)
       this.animateNext(elements, 0)
     },
     animateNext(elements, index) {
@@ -192,27 +205,23 @@ export default {
         return
       }
       let el = this.cli.element(element)
-
-      if (ignoreList.indexOf(el.type) === -1)
+      this.overlays.add(el, {
+        position: {
+          top: -30,
+          right: 0,
+        },
+        html: '<div class="loader"></div>',
+      })
+      setTimeout(() => {
+        this.overlays.remove({ element: el })
         this.overlays.add(el, {
           position: {
             top: -30,
             right: 0,
           },
-          html: '<div class="loader"></div>',
+          html:
+            '<span class="checkmark"><div class="checkmark_circle"></div><div class="checkmark_stem"></div><div class="checkmark_kick"></div></span>',
         })
-      setTimeout(() => {
-        this.overlays.remove({ element: el })
-        if (ignoreList.indexOf(el.type) === -1) {
-          this.overlays.add(el, {
-            position: {
-              top: -30,
-              right: 0,
-            },
-            html:
-              '<span class="checkmark"><div class="checkmark_circle"></div><div class="checkmark_stem"></div><div class="checkmark_kick"></div></span>',
-          })
-        }
         this.animateNext(elements, index + 1)
       }, 2000)
     },

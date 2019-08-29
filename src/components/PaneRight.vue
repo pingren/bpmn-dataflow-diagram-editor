@@ -27,7 +27,7 @@
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(20vh - 51px);'"
         >
           <p style="text-align: left;padding:0 1em;">
-            朴素贝叶斯是一种构建分类器的简单方法。该分类器模型会给问题实例分配用特征值表示的类标签，类标签取自有限集合。它不是训练这种分类器的单一算法，而是一系列基于相同原理的算法：所有朴素贝叶斯分类器都假定样本每个特征与其他特征都不相关。举个例子，如果一种水果其具有红，圆，直径大概3英寸等特征，该水果可以被判定为是苹果。尽管这些特征相互依赖或者有些特征由其他特征决定，然而朴素贝叶斯分类器认为这些属性在判定该水果是否为苹果的概率分布上独立的。
+            {{ value ? value.description : '算子说明' }}
           </p>
         </div>
       </el-submenu>
@@ -50,21 +50,27 @@
           </span>
         </template>
         <el-menu-item-group
+          ref="activities"
           class="submenu"
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 146px);'"
         >
-          <el-timeline style="padding-right:1em;">
-            <el-timeline-item
-              v-for="(activity, index) in activities"
-              :key="index"
-              :icon="activity.icon"
-              :type="activity.type"
-              :color="activity.color"
-              :size="activity.size"
-              :timestamp="activity.timestamp"
-            >
-              {{ activity.content }}
-            </el-timeline-item>
+          <el-timeline
+            v-if="activities"
+            style="padding-right:1em;"
+          >
+            <transition-group name="list">
+              <el-timeline-item
+                v-for="(activity) in activities"
+                :key="activity.timestamp"
+                :icon="activity.icon"
+                :type="activity.type"
+                :color="activity.color"
+                :size="activity.size"
+                :timestamp="activity.timestamp"
+              >
+                {{ activity.content }}
+              </el-timeline-item>
+            </transition-group>
           </el-timeline>
         </el-menu-item-group>
         </div>
@@ -102,43 +108,32 @@
 
 <script>
 export default {
-  name: 'App',
-
+  props: {
+    value: {
+      type: Object,
+      default: undefined,
+    },
+    activities: {
+      type: Array,
+      default: undefined,
+    },
+  },
   data() {
     return {
       isCollapse: false,
       radio: '1',
-      activities: [
-        {
-          content: 'Hadoop 数据源运行成功',
-          timestamp: '2019-04-01 20:46',
-          size: 'large',
-          type: 'success',
-          icon: 'el-icon-success',
-        },
-        {
-          content: '贝叶斯分类算子正在运行',
-          timestamp: '2019-04-01 20:47',
-          size: 'large',
-          type: 'primary',
-          icon: 'el-icon-more',
-        },
-        {
-          content: '工程配置有误',
-          timestamp: '2019-04-01 20:48',
-          size: 'large',
-          type: 'warning',
-          icon: 'el-icon-warning',
-        },
-        {
-          content: '停止工程运行',
-          timestamp: '2019-04-01 20:49',
-          size: 'large',
-          type: 'danger',
-          icon: 'el-icon-error',
-        },
-      ],
     }
+  },
+  watch: {
+    activities() {
+      if (this.activities.length) {
+        let element = this.$refs.activities.$el
+
+        this.$nextTick(() => {
+          element.scrollTop = element.scrollHeight
+        })
+      }
+    },
   },
 }
 </script>
@@ -163,5 +158,12 @@ export default {
 .submenu {
   overflow: auto;
   max-width: 500px;
+}
+.list-enter-active,
+.list-leave-active {
+  transition: opacity 1s;
+}
+.list-enter {
+  opacity: 0;
 }
 </style>

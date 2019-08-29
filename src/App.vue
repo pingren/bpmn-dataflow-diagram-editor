@@ -6,8 +6,12 @@
       <BPMNEditor
         style="height:100vh;width:100%;"
         @node-click="nodeClick"
+        @run="run"
       />
-      <PaneRight />
+      <PaneRight
+        v-model="currentNode"
+        :activities="activities"
+      />
     </el-container>
   </div>
 </template>
@@ -15,10 +19,10 @@
 <script>
 import PaneLeft from './components/PaneLeft'
 import PaneRight from './components/PaneRight'
-
 import BPMNEditor from './components/BPMNEditor.vue'
 
-// import './app.js'
+import { operatorList } from './mock.js'
+import { setTimeout } from 'timers'
 
 export default {
   name: 'App',
@@ -27,9 +31,61 @@ export default {
     PaneLeft,
     PaneRight,
   },
+  data: function() {
+    return {
+      currentNode: undefined,
+      activities: [],
+    }
+  },
   methods: {
     nodeClick(node) {
       console.log(node)
+      if (node.id) {
+        let operator = operatorList.find(item => item.id === node.id)
+        if (operator) {
+          this.currentNode = operator
+        } else {
+          this.currentNode = undefined
+        }
+      }
+    },
+    run() {
+      this.activities = []
+      let activities = [
+        {
+          content: 'Hadoop 数据源运行成功',
+          timestamp: '2019-04-01 20:46',
+          size: 'large',
+          type: 'success',
+          icon: 'el-icon-success',
+        },
+        {
+          content: '贝叶斯分类算子正在运行',
+          timestamp: '2019-04-01 20:47',
+          size: 'large',
+          type: 'primary',
+          icon: 'el-icon-more',
+        },
+        {
+          content: '工程配置有误',
+          timestamp: '2019-04-01 20:48',
+          size: 'large',
+          type: 'warning',
+          icon: 'el-icon-warning',
+        },
+        {
+          content: '停止工程运行',
+          timestamp: '2019-04-01 20:49',
+          size: 'large',
+          type: 'danger',
+          icon: 'el-icon-error',
+        },
+      ]
+      activities.forEach((item, index) => {
+        setTimeout(() => {
+          this.activities.push(item)
+        }, (index + 1) * 2000)
+      })
     },
   },
 }

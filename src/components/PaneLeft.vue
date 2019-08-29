@@ -47,7 +47,6 @@ import OperatorPicker from './OperatorPicker'
 import DatabasePicker from './DatabasePicker'
 
 export default {
-  name: 'App',
   components: {
     OperatorPicker,
     DatabasePicker,
