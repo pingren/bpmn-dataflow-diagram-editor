@@ -128,12 +128,14 @@ export default {
     this.canvas = this.bpmnModeler.get('canvas')
     this.overlays = this.bpmnModeler.get('overlays')
     this.eventBus = this.bpmnModeler.get('eventBus')
+
+    // dev purpose, debug only
     this.eventBus.on('element.dblclick', 10000, event => {
       // return false // will cancel event
       let el = event.element
       if (ignoreList.indexOf(el.type) === -1) {
         this.drawerContent = el.businessObject
-        console.log(el)
+        // console.log(el)
         this.drawerVisible = true
       }
       return false
@@ -179,7 +181,7 @@ export default {
       el.businessObject.name = node.data.label
       el.businessObject = Object.assign(el.businessObject, node.data)
       delete el.businessObject.label
-      console.log(el.businessObject)
+      // console.log(el.businessObject)
       this.eventBus.fire('element.changed', {
         element: el,
       })
@@ -196,7 +198,7 @@ export default {
       let elements = this.cli
         .elements()
         .filter(item => ignoreList.indexOf(this.cli.element(item).type) === -1)
-      console.log(elements)
+      // console.log(elements)
       this.animateNext(elements, 0)
     },
     animateNext(elements, index) {

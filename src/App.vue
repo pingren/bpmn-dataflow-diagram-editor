@@ -10,6 +10,7 @@
       />
       <PaneRight
         v-model="currentNode"
+        :operator-config="currentConfig"
         :activities="activities"
       />
     </el-container>
@@ -33,19 +34,21 @@ export default {
   },
   data: function() {
     return {
+      currentConfig: undefined,
       currentNode: undefined,
       activities: [],
     }
   },
   methods: {
     nodeClick(node) {
-      console.log(node)
+      // console.log(node)
+      this.currentNode = node
       if (node.id) {
         let operator = operatorList.find(item => item.id === node.id)
         if (operator) {
-          this.currentNode = operator
+          this.currentConfig = operator
         } else {
-          this.currentNode = undefined
+          this.currentConfig = undefined
         }
       }
     },

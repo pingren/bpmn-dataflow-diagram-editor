@@ -8,11 +8,93 @@ export const operatorList = [
     所有朴素贝叶斯分类器都假定样本每个特征与其他特征都不相关。举个例子，
     如果一种水果其具有红，圆，直径大概3英寸等特征，该水果可以被判定为是苹果。
     尽管这些特征相互依赖或者有些特征由其他特征决定，然而朴素贝叶斯分类器认为这些属性在判定该水果是否为苹果的概率分布上独立的。`,
+    props: [
+      {
+        label: '配置1',
+        prop: 'option1',
+        type: 'input',
+      },
+      {
+        label: '配置2:速度',
+        prop: 'option2',
+        type: 'select',
+        options: [
+          {
+            value: 'fast',
+            label: '快速',
+          },
+          {
+            value: 'slow',
+            label: '慢速',
+          },
+        ],
+      },
+      {
+        label: '配置3:测试',
+        prop: 'option3',
+        type: 'mselect',
+        options: [
+          {
+            value: 'A',
+            label: 'A',
+          },
+          {
+            value: 'B',
+            label: 'B',
+          },
+          {
+            value: 'C',
+            label: 'C',
+          },
+        ],
+      },
+    ],
   },
   {
     id: 10,
     label: '逻辑回归',
     description:
       '逻辑回归（Logistic Regression）是一种用于解决二分类（0 or 1）问题的机器学习方法，用于估计某种事物的可能性。比如某用户购买某商品的可能性，某病人患有某种疾病的可能性，以及某广告被用户点击的可能性等。',
+    props: [
+      {
+        label: '配置4',
+        prop: 'option4',
+        type: 'input',
+      },
+      {
+        label: '配置5:速度',
+        prop: 'option5',
+        type: 'select',
+        options: [
+          {
+            value: 'fast',
+            label: '快速',
+          },
+          {
+            value: 'slow',
+            label: '慢速',
+          },
+        ],
+      },
+      {
+        label: '配置6:测试',
+        prop: 'option6',
+        type: 'mselect',
+        options: [
+          {
+            value: 'A',
+            label: 'A',
+          },
+          {
+            value: 'B',
+            label: 'B',
+          },
+          {
+            value: 'C',
+            label: 'C',
+          },
+        ],
+      },
+    ],
   },
 ]

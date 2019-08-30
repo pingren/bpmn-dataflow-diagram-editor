@@ -27,7 +27,7 @@
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(20vh - 51px);'"
         >
           <p style="text-align: left;padding:0 1em;">
-            {{ value ? value.description : '算子说明' }}
+            {{ operatorConfig ? operatorConfig.description : '算子说明' }}
           </p>
         </div>
       </el-submenu>
@@ -37,11 +37,16 @@
           <span slot="title">属性
           </span>
         </template>
-        <el-form :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 35px);'" />
         <!-- <OperatorPicker
           class="submenu"
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(70vh - 35px);'"
         /> -->
+        <PaneProperty
+          v-if="operatorConfig"
+          :config="operatorConfig"
+          :value="value"
+          :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 35px);'"
+        />
       </el-submenu>
       <el-submenu index="3">
         <template slot="title">
@@ -52,7 +57,7 @@
         <el-menu-item-group
           ref="activities"
           class="submenu"
-          :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 146px);'"
+          :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 180px);'"
         >
           <el-timeline
             v-if="activities"
@@ -81,33 +86,40 @@
           <span slot="title">节点数据配置
           </span>
         </template>
-        <el-form
-          label-width="150px"
-          size="mini"
-        >
-          <p style="text-align:center">
-            <span>是否输出节点数据</br></span>
-            <el-radio
-              v-model="radio"
-              label="1"
-            >
-              是
-            </el-radio>
-            <el-radio
-              v-model="radio"
-              label="2"
-            >
-              否
-            </el-radio>
-          </p>
-        </el-form>
+        <p style="text-align:center">
+          <span>是否输出节点数据</br></span>
+          <el-radio
+            v-model="radio"
+            label="1"
+          >
+            是
+          </el-radio>
+          <el-radio
+            v-model="radio"
+            label="2"
+          >
+            否
+          </el-radio>
+        </p>
+        <p style="text-align:center">
+          <el-button
+            size="mini"
+            type="info"
+          >
+            查看工程结果
+          </el-button>
+        </p>
       </el-submenu>
     </el-menu>
   </el-card>
 </template>
 
 <script>
+import PaneProperty from './PaneProperty'
 export default {
+  components: {
+    PaneProperty,
+  },
   props: {
     value: {
       type: Object,
@@ -115,6 +127,10 @@ export default {
     },
     activities: {
       type: Array,
+      default: undefined,
+    },
+    operatorConfig: {
+      type: Object,
       default: undefined,
     },
   },
