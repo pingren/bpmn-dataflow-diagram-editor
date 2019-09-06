@@ -55,11 +55,18 @@ export const operatorList = [
     label: '逻辑回归',
     description:
       '逻辑回归（Logistic Regression）是一种用于解决二分类（0 or 1）问题的机器学习方法，用于估计某种事物的可能性。比如某用户购买某商品的可能性，某病人患有某种疾病的可能性，以及某广告被用户点击的可能性等。',
+    iopatch: {
+      name: 'blabla',
+      key: 'blabla',
+      value: '',
+    },
+    datatype: 'dict',
     props: [
       {
         label: '配置4',
         prop: 'option4',
         type: 'input',
+        regex: '',
       },
       {
         label: '配置5:速度',

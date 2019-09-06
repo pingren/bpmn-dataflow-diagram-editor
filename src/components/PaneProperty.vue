@@ -55,18 +55,17 @@ export default {
   watch: {
     form: {
       handler(before, after) {
-        let el = this.value
-        if (el) {
-          el = Object.assign(el, this.form)
+        if (this.value) {
+          for (let [key, value] of Object.entries(this.form)) {
+            this.value.set(key, value)
+          }
         }
       },
       deep: true,
     },
-    'value.di.id': {
+    'value.$attrs': {
       handler(value) {
-        this.form = Object.assign({}, this.value)
-        delete this.form.$type
-        delete this.form.di
+        this.form = Object.assign({}, value)
       },
       immediate: true,
     },
