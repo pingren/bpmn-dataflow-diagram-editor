@@ -4,7 +4,7 @@
     <el-container>
       <PaneLeft />
       <BPMNEditor
-        style="height:100vh;width:100%;"
+        style="height:calc(100vh - 25px);width:100%;"
         @node-click="nodeClick"
         @run="run"
       />
@@ -44,7 +44,7 @@ export default {
       // console.log(node)
       this.currentNode = node
       if (node.id) {
-        let operator = operatorList.find(item => item.id === node.id)
+        let operator = operatorList.find(item => item.id === node.ID)
         if (operator) {
           this.currentConfig = operator
         } else {

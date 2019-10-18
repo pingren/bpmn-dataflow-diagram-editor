@@ -1,6 +1,7 @@
 import InteractionEvents from './InteractionEvents'
 import ContextPadProvider from './ContextPadProvider'
 import BpmnRules from './BpmnRules'
+import BpmnRenderer from './BpmnRenderer'
 
 export default {
   __init__: ['interactionEvents'],
@@ -19,4 +20,5 @@ export default {
   bpmnRules: ['type', BpmnRules],
   // 画布拖动禁用
   // moveCanvas: ['value', ''],
+  bpmnRenderer: ['type', BpmnRenderer],
 }

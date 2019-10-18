@@ -1,7 +1,7 @@
 <template>
   <el-tree
     :data="data"
-    node-key="id"
+    node-key="ID"
     default-expand-all
     draggable
     :allow-drop="allowDrop"
@@ -16,15 +16,15 @@ export default {
     return {
       data: [
         {
-          id: 1,
+          ID: 1,
           label: 'DataSource A',
         },
         {
-          id: 2,
+          ID: 2,
           label: 'DataSource B',
         },
         {
-          id: 3,
+          ID: 3,
           label: 'DataSource C',
         },
       ],

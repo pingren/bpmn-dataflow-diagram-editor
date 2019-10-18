@@ -123,9 +123,8 @@ export default {
   },
   watch: {
     activities() {
-      if (this.activities.length) {
+      if (this.activities && this.activities.length && this.$refs.activities) {
         let element = this.$refs.activities.$el
-
         this.$nextTick(() => {
           element.scrollTop = element.scrollHeight
         })

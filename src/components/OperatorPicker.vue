@@ -1,7 +1,7 @@
 <template>
   <el-tree
     :data="data"
-    node-key="id"
+    node-key="ID"
     default-expand-all
     draggable
     :allow-drop="allowDrop"
@@ -16,33 +16,33 @@ export default {
     return {
       data: [
         {
-          id: 1,
+          ID: 1,
           label: 'Operator 算子',
           children: [
             {
-              id: 4,
+              ID: 4,
               label: 'Type 1',
               children: [
                 {
-                  id: 9,
+                  ID: 9,
                   label: 'Naive Bayes classifier 朴素贝叶斯',
                 },
                 {
-                  id: 10,
+                  ID: 10,
                   label: 'Logistic regression 逻辑回归',
                 },
               ],
             },
             {
-              id: 2,
+              ID: 2,
               label: 'Type 2',
               children: [
                 {
-                  id: 5,
+                  ID: 5,
                   label: 'K-means Clustering K均值',
                 },
                 {
-                  id: 6,
+                  ID: 6,
                   label: 'Canopy Clustering Canopy聚类',
                 },
               ],

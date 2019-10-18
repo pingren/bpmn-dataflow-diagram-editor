@@ -45,12 +45,13 @@
     />
     <div>
       <el-drawer
-        title="属性查看"
+        title="Debugging"
         :visible.sync="drawerVisible"
         :modal="false"
-        size="35%"
+        size="70%"
         :modal-append-to-body="false"
         :close-on-press-escape="false"
+        custom-class="devdrawer"
       >
         <pre>{{ drawerContent }}</pre>
       </el-drawer>
@@ -123,17 +124,19 @@ export default {
     this.overlays = this.bpmnModeler.get('overlays')
     this.eventBus = this.bpmnModeler.get('eventBus')
 
-    // dev purpose, debug only
-    this.eventBus.on('element.dblclick', 10000, event => {
-      // return false // will cancel event
-      let el = event.element
-      if (ignoreList.indexOf(el.type) === -1) {
-        this.drawerContent = el.businessObject
-        // console.log(el)
-        this.drawerVisible = true
-      }
-      return false
-    })
+    // dev debug only
+    if (process.env.NODE_ENV !== 'production') {
+      this.eventBus.on('element.dblclick', 10000, event => {
+        // return false // will cancel event
+        let el = event.element
+        if (ignoreList.indexOf(el.type) === -1) {
+          this.drawerContent = el.businessObject
+          // console.log(el)
+          this.drawerVisible = true
+        }
+        return false
+      })
+    }
 
     this.eventBus.on('element.click', 0, event => {
       // return false // will cancel event
@@ -143,6 +146,10 @@ export default {
         return true
       }
       return false
+    })
+
+    this.eventBus.on('commandStack.changed', () => {
+      this.clearSymbols()
     })
   },
   methods: {
@@ -164,19 +171,42 @@ export default {
         },
         'Process_1'
       )
-      // this.cli.setLabel(id, node.data.label)
-      // TODO: 这样会导致一条历史记录，因此直接修改对象的 name, need fix
+      function getTextWidth(text, font) {
+        // re-use canvas object for better performance
+        var canvas =
+          getTextWidth.canvas ||
+          (getTextWidth.canvas = document.createElement('canvas'))
+        var context = canvas.getContext('2d')
+        context.font = font
+        var metrics = context.measureText(text)
+        return metrics.width
+      }
       let el = this.cli.element(id)
       el.businessObject.name = node.data.label
       el.businessObject = Object.assign(el.businessObject, node.data)
       delete el.businessObject.label
+
+      // Beautify element
+      // width & height should reflect on both VIEW & XML
+      el.width = el.businessObject.di.bounds.width =
+        getTextWidth(el.businessObject.name, '12px Arial, sans-serif') + 65
+      el.height = el.businessObject.di.bounds.height = 36
+
       this.eventBus.fire('element.changed', {
         element: el,
       })
       window.draggingNode = null
     },
+    clearSymbols() {
+      let elements = this.cli.elements()
+      for (let node of elements) {
+        let el = this.cli.element(node)
+        this.overlays.remove({ element: el })
+      }
+    },
     // animation DEMO
     animate() {
+      this.clearSymbols()
       this.$emit('run')
       let elements = this.cli
         .elements()
@@ -216,11 +246,9 @@ export default {
         if (err) {
           console.log(err)
         } else {
-          console.log(xml)
-          let definitions = this.bpmnModeler.get('canvas').getRootElement()
-            .businessObject.$parent
-          console.log(JSON.stringify(definitions))
-          alert(`查看浏览器控制台~`)
+          // console.log(xml)
+          this.drawerVisible = true
+          this.drawerContent = xml
         }
       })
     },
@@ -234,6 +262,10 @@ export default {
 }
 </script>
 <style lang="css">
+.devdrawer {
+  height: 100%;
+  overflow: auto !important;
+}
 /* Styles Required */
 @import '~bpmn-js/dist/assets/diagram-js.css';
 /* @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn.css'; */
@@ -291,5 +323,14 @@ export default {
   background-color: #fff;
   left: 8px;
   top: 12px;
+}
+.containers {
+  background-image: linear-gradient(
+      to right,
+      rgba(111, 111, 111, 0.1) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(188, 188, 188, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
 }
 </style>
