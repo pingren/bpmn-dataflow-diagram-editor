@@ -10,27 +10,27 @@ export const operatorList = [
     尽管这些特征相互依赖或者有些特征由其他特征决定，然而朴素贝叶斯分类器认为这些属性在判定该水果是否为苹果的概率分布上独立的。`,
     props: [
       {
-        label: '配置1',
-        prop: 'option1',
+        label: 'Config 1',
+        prop: 'c1',
         type: 'input',
       },
       {
-        label: '配置2:速度',
-        prop: 'option2',
+        label: 'Config 2',
+        prop: 'c2',
         type: 'select',
         options: [
           {
             value: 'fast',
-            label: '快速',
+            label: 'fast',
           },
           {
             value: 'slow',
-            label: '慢速',
+            label: 'slow',
           },
         ],
       },
       {
-        label: '配置3:测试',
+        label: 'Config 3',
         prop: 'option3',
         type: 'mselect',
         options: [
@@ -55,37 +55,32 @@ export const operatorList = [
     label: '逻辑回归',
     description:
       '逻辑回归（Logistic Regression）是一种用于解决二分类（0 or 1）问题的机器学习方法，用于估计某种事物的可能性。比如某用户购买某商品的可能性，某病人患有某种疾病的可能性，以及某广告被用户点击的可能性等。',
-    iopatch: {
-      name: 'blabla',
-      key: 'blabla',
-      value: '',
-    },
     datatype: 'dict',
     props: [
       {
-        label: '配置4',
-        prop: 'option4',
+        label: 'Config 4',
+        prop: 'c4',
         type: 'input',
         regex: '',
       },
       {
-        label: '配置5:速度',
-        prop: 'option5',
+        label: 'Config 5',
+        prop: 'c5',
         type: 'select',
         options: [
           {
             value: 'fast',
-            label: '快速',
+            label: 'fast',
           },
           {
             value: 'slow',
-            label: '慢速',
+            label: 'slow',
           },
         ],
       },
       {
-        label: '配置6:测试',
-        prop: 'option6',
+        label: 'Config 6',
+        prop: 'c6',
         type: 'mselect',
         options: [
           {

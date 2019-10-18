@@ -17,16 +17,15 @@ export default {
       data: [
         {
           id: 1,
-          label: '数据源 Spark',
-          type: 'dataSource',
+          label: 'DataSource A',
         },
         {
           id: 2,
-          label: '数据源 Hadoop',
+          label: 'DataSource B',
         },
         {
           id: 3,
-          label: '数据源 Monogodb',
+          label: 'DataSource C',
         },
       ],
       defaultProps: {

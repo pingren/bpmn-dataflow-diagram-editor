@@ -56,28 +56,28 @@ export default {
       this.activities = []
       let activities = [
         {
-          content: 'Hadoop 数据源运行成功',
+          content: 'A completed!',
           timestamp: '2019-04-01 20:46',
           size: 'large',
           type: 'success',
           icon: 'el-icon-success',
         },
         {
-          content: '贝叶斯分类算子正在运行',
+          content: 'B is running',
           timestamp: '2019-04-01 20:47',
           size: 'large',
           type: 'primary',
           icon: 'el-icon-more',
         },
         {
-          content: '工程配置有误',
+          content: 'Config errors',
           timestamp: '2019-04-01 20:48',
           size: 'large',
           type: 'warning',
           icon: 'el-icon-warning',
         },
         {
-          content: '停止工程运行',
+          content: 'Stop running',
           timestamp: '2019-04-01 20:49',
           size: 'large',
           type: 'danger',

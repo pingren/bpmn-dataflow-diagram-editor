@@ -1,7 +1,7 @@
 <template>
   <el-form
     v-if="props"
-    style="padding:20px"
+    style="padding:0 20px; overflow:auto;"
     label-position="right"
     label-width="100px"
     :model="form"

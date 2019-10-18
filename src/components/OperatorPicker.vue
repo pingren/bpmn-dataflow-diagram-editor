@@ -17,59 +17,35 @@ export default {
       data: [
         {
           id: 1,
-          label: 'mathout 算子',
+          label: 'Operator 算子',
           children: [
             {
               id: 4,
-              label: '分类',
+              label: 'Type 1',
               children: [
                 {
                   id: 9,
-                  label: '朴素贝叶斯',
+                  label: 'Naive Bayes classifier 朴素贝叶斯',
                 },
                 {
                   id: 10,
-                  label: '逻辑回归',
+                  label: 'Logistic regression 逻辑回归',
                 },
               ],
             },
             {
               id: 2,
-              label: '聚类',
+              label: 'Type 2',
               children: [
                 {
                   id: 5,
-                  label: 'K均值',
+                  label: 'K-means Clustering K均值',
                 },
                 {
                   id: 6,
-                  label: 'Canopy算法',
+                  label: 'Canopy Clustering Canopy聚类',
                 },
               ],
-            },
-          ],
-        },
-        {
-          id: 2,
-          label: '预处理',
-          children: [
-            {
-              id: 5,
-              label: '采样',
-            },
-            {
-              id: 6,
-              label: '特征选择',
-            },
-          ],
-        },
-        {
-          id: 3,
-          label: '后处理',
-          children: [
-            {
-              id: 7,
-              label: '合并数据源和结果数据',
             },
           ],
         },

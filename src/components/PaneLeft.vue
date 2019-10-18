@@ -19,7 +19,7 @@
       <el-submenu index="1">
         <template slot="title">
           <i class="el-icon-coin" />
-          <span slot="title">第一步：数据源
+          <span slot="title">Datasource List
           </span>
         </template>
         <DatabasePicker
@@ -30,7 +30,7 @@
       <el-submenu index="2">
         <template slot="title">
           <i class="el-icon-magic-stick" />
-          <span slot="title">第二步：选择算子
+          <span slot="title">Operators Tree
           </span>
         </template>
         <OperatorPicker
@@ -70,7 +70,7 @@ export default {
 /deep/ .el-submenu__title {
   height: 2.5em;
   line-height: 2.5em;
-  background-color: #eff5ff;
+  background-color: #f3f9ef;
   text-align: left;
 }
 /deep/ .el-menu:not(.el-menu--collapse) {

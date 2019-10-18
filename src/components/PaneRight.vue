@@ -19,7 +19,7 @@
       <el-submenu index="1">
         <template slot="title">
           <i class="el-icon-document" />
-          <span slot="title">算子说明
+          <span slot="title">Operator Info
           </span>
         </template>
         <div
@@ -27,31 +27,42 @@
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(20vh - 51px);'"
         >
           <p style="text-align: left;padding:0 1em;">
-            {{ operatorConfig ? operatorConfig.description : '算子说明' }}
+            {{ operatorConfig ? operatorConfig.description : '' }}
           </p>
         </div>
       </el-submenu>
       <el-submenu index="2">
         <template slot="title">
           <i class="el-icon-edit-outline" />
-          <span slot="title">属性
+          <span slot="title">Property
           </span>
         </template>
-        <!-- <OperatorPicker
+        <el-menu-item-group
           class="submenu"
-          :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(70vh - 35px);'"
-        /> -->
-        <PaneProperty
-          v-if="operatorConfig"
-          :config="operatorConfig"
-          :value="value"
-          :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 35px);'"
-        />
+          :style="
+            isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 35px);'
+          "
+        >
+          <PaneProperty
+            v-if="operatorConfig"
+            :config="operatorConfig"
+            :value="value"
+          />
+          <span
+            v-else
+            style="color:lightgrey;"
+          >
+            No Configruable Property</br></br>
+          </span>
+        </el-menu-item-group>
       </el-submenu>
-      <el-submenu index="3">
+      <el-submenu
+        v-if="activities && activities.length"
+        index="3"
+      >
         <template slot="title">
           <i class="el-icon-view" />
-          <span slot="title">工程运行进度
+          <span slot="title">Progress
           </span>
         </template>
         <el-menu-item-group
@@ -79,36 +90,6 @@
           </el-timeline>
         </el-menu-item-group>
         </div>
-      </el-submenu>
-      <el-submenu index="4">
-        <template slot="title">
-          <i class="el-icon-magic-stick" />
-          <span slot="title">节点数据配置
-          </span>
-        </template>
-        <p style="text-align:center">
-          <span>是否输出节点数据</br></span>
-          <el-radio
-            v-model="radio"
-            label="1"
-          >
-            是
-          </el-radio>
-          <el-radio
-            v-model="radio"
-            label="2"
-          >
-            否
-          </el-radio>
-        </p>
-        <p style="text-align:center">
-          <el-button
-            size="mini"
-            type="info"
-          >
-            查看工程结果
-          </el-button>
-        </p>
       </el-submenu>
     </el-menu>
   </el-card>
@@ -165,7 +146,7 @@ export default {
 /deep/ .el-submenu__title {
   height: 2.5em;
   line-height: 2.5em;
-  background-color: #eff5ff;
+  background-color: #f3f9ef;
   text-align: left;
 }
 /deep/ .el-menu:not(.el-menu--collapse) {
