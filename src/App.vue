@@ -41,10 +41,11 @@ export default {
   },
   methods: {
     nodeClick(node) {
-      // console.log(node)
       this.currentNode = node
-      if (node.id) {
-        let operator = operatorList.find(item => item.id === node.ID)
+      if (node.$attrs.ID) {
+        let operator = operatorList.find(
+          item => String(item.id) === String(node.$attrs.ID)
+        )
         if (operator) {
           this.currentConfig = operator
         } else {

@@ -1,6 +1,7 @@
 <template>
   <el-form
     v-if="props"
+    :key="value.id"
     style="padding:0 20px; overflow:auto;"
     label-position="right"
     label-width="100px"
@@ -56,16 +57,22 @@ export default {
     form: {
       handler(before, after) {
         if (this.value) {
-          for (let [key, value] of Object.entries(this.form)) {
-            this.value.set(key, value)
-          }
+          // for (let [key, value] of Object.entries(this.form)) {
+          //   this.value.set(key, value)
+          // }
+          this.value.set('PROPERTY', JSON.stringify(this.form))
         }
       },
       deep: true,
     },
-    'value.$attrs': {
-      handler(value) {
-        this.form = Object.assign({}, value)
+    'value.id': {
+      handler() {
+        console.log('changed')
+        if (this.value.$attrs.PROPERTY) {
+          this.form = Object.assign({}, JSON.parse(this.value.$attrs.PROPERTY))
+        } else {
+          this.form = Object.assign({}, undefined)
+        }
       },
       immediate: true,
     },

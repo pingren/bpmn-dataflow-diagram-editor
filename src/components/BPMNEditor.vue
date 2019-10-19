@@ -55,7 +55,7 @@
         title="Debugging"
         :visible.sync="drawerVisible"
         :modal="false"
-        size="70%"
+        size="30%"
         :modal-append-to-body="false"
         :close-on-press-escape="false"
         custom-class="devdrawer"
@@ -140,8 +140,13 @@ export default {
         // return false // will cancel event
         let el = event.element
         if (ignoreList.indexOf(el.type) === -1) {
-          this.drawerContent = el.businessObject
-          // console.log(el)
+          this.drawerContent = Object.assign({}, el.businessObject)
+          this.drawerContent.attrs = el.businessObject.$attrs
+          if (this.drawerContent.attrs.PROPERTY) {
+            this.drawerContent.attrs.PROPERTY = JSON.parse(
+              this.drawerContent.attrs.PROPERTY
+            )
+          }
           this.drawerVisible = true
         }
         return false
@@ -193,15 +198,18 @@ export default {
       }
       let el = this.cli.element(id)
       el.businessObject.name = node.data.label
-      el.businessObject = Object.assign(el.businessObject, node.data)
-      delete el.businessObject.label
-
+      // el.businessObject = Object.assign(el.businessObject, node.data)
+      // delete el.businessObject.label
+      el.businessObject.set('ID', node.data.ID)
       // Beautify element
       // width & height should reflect on both VIEW & XML
       el.width = el.businessObject.di.bounds.width =
         getTextWidth(el.businessObject.name, '12px Arial, sans-serif') + 65
       el.height = el.businessObject.di.bounds.height = 36
-
+      // select/focus element
+      this.bpmnModeler
+        .get('interactionEvents')
+        .triggerMouseEvent('click', Event, el)
       this.eventBus.fire('element.changed', {
         element: el,
       })
