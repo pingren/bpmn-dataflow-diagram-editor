@@ -2,7 +2,7 @@
   <div>
     <el-card
       :body-style="{ padding:'5px', }"
-      style="z-index:8;width:auto;left:calc(50% - 270px);position:absolute;"
+      style="z-index:8;width:auto;left:calc(50% - 350px);position:absolute;"
     >
       <el-button
         :disabled="!canUndo"
@@ -19,6 +19,13 @@
         @click="redo"
       >
         Redo 恢复
+      </el-button>
+      <el-button
+        size="mini"
+        icon="el-icon-document-add"
+        @click="load"
+      >
+        Load XML 读取
       </el-button>
       <el-button
         size="mini"
@@ -53,6 +60,9 @@
         :close-on-press-escape="false"
         custom-class="devdrawer"
       >
+        <el-button @click="copy">
+          Copy Content 复制内容
+        </el-button>
         <pre>{{ drawerContent }}</pre>
       </el-drawer>
     </div>
@@ -249,6 +259,35 @@ export default {
           // console.log(xml)
           this.drawerVisible = true
           this.drawerContent = xml
+        }
+      })
+    },
+    copy() {
+      navigator.clipboard.writeText(this.drawerContent).then(
+        () => {
+          this.$message.success('Copied 已经复制')
+        },
+        error => {
+          console.log(error)
+          this.$message.error('Failed!Please copy mananuly 失败！请手动复制')
+        }
+      )
+    },
+    // load XML DEMO
+    load() {
+      let result = window.prompt(
+        'Please input BPMN XML, You can copy/paste it after saving.\n 请输入 BPMN XML，你可以在保存之后复制/粘贴。',
+        ''
+      )
+      if (result === null) {
+        return
+      }
+      this.bpmnModeler.importXML(result, err => {
+        if (err) {
+          console.error(err)
+          this.$message.error(
+            'Loading Error Please Check XML. 读取失败请检查 XML 格式!'
+          )
         }
       })
     },
