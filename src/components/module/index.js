@@ -5,20 +5,19 @@ import BpmnRenderer from './BpmnRenderer'
 
 export default {
   __init__: ['interactionEvents'],
-  // context 面板
+  // custom contextPadProvider 自定义面板
   contextPadProvider: ['type', ContextPadProvider],
-  // label 拖动禁用
+  // disable label dragging 拖动禁用
   interactionEvents: ['type', InteractionEvents],
-  // label 编辑禁用
+  // disable label content editing 编辑禁用
   labelEditingProvider: ['value', ''],
   labelEditingPreview: ['value', ''],
-  // palette 禁用
+  // disable left palette 禁用
   paletteProvider: ['value', ''],
-  // 滚轮禁用
+  // disable scroll zoom 滚轮禁用
   zoomScroll: ['value', ''],
-  // 多次连接禁用，连接线规则修改
+  // disable multiple connections between two nodes 多次连接禁用，连接线规则修改
   bpmnRules: ['type', BpmnRules],
-  // 画布拖动禁用
-  // moveCanvas: ['value', ''],
+  // custom BpmnRenderer for node styles 自定义元素样式
   bpmnRenderer: ['type', BpmnRenderer],
 }
