@@ -122,7 +122,7 @@ export default {
         defaultStrokeColor: '#6CB139',
       },
     })
-    // imoprt default graph
+    // imoprt default diagram
     this.bpmnModeler.importXML(diagramXML, err => {
       if (err) {
         console.error(err)
@@ -141,7 +141,7 @@ export default {
         let el = event.element
         if (ignoreList.indexOf(el.type) === -1) {
           this.drawerContent = Object.assign({}, el.businessObject)
-          this.drawerContent.attrs = el.businessObject.$attrs
+          this.drawerContent.attrs = Object.assign({}, el.businessObject.$attrs)
           if (this.drawerContent.attrs.PROPERTY) {
             this.drawerContent.attrs.PROPERTY = JSON.parse(
               this.drawerContent.attrs.PROPERTY

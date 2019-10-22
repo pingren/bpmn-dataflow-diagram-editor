@@ -6,10 +6,10 @@ This project is an example of a flow diagram editor. It is built upon bpmn-js an
 
 ## Features
 
-- Edit: create a flow-like chart by simply drag & click.
-- Save & Load: save to / load from a customized BPMN XML.
-- Property panel: an extendible property panel binding JSON to nodes.
-- Animation: display any CSS styles animation on nodes.
+- Edit: create a flow-like chart by simply drag & click. ![gif](screencast1.gif)
+- Save & Load: save to / load from a customized BPMN XML. ![gif](screencast2.gif)
+- Property panel: an extendible property panel binding JSON to XML model. ![gif](screencast3.gif)
+- Animation: display any CSS styles animation on nodes.![gif](screencast4.gif)
 
 ## Getting Started
 
