@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { setDraggingNode } from '../bpmn'
 export default {
   data() {
     return {
@@ -37,7 +38,7 @@ export default {
   methods: {
     handleDragStart(node, ev) {
       node.data.type = 'bpmn:ServiceTask'
-      window.draggingNode = node
+      setDraggingNode(node)
     },
     allowDrop(draggingNode, dropNode, type) {
       return false

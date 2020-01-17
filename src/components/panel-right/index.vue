@@ -26,9 +26,7 @@
           class="submenu"
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(20vh - 51px);'"
         >
-          <p style="text-align: left;padding:0 1em;">
-            {{ operatorConfig ? operatorConfig.description : '' }}
-          </p>
+          <PaneInfo />
         </div>
       </el-submenu>
       <el-submenu index="2">
@@ -43,17 +41,7 @@
             isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 35px);'
           "
         >
-          <PaneProperty
-            v-if="operatorConfig"
-            :config="operatorConfig"
-            :value="value"
-          />
-          <span
-            v-else
-            style="color:lightgrey;"
-          >
-            No Configruable Property</br></br>
-          </span>
+          <PaneProperty />
         </el-menu-item-group>
       </el-submenu>
       <el-submenu
@@ -97,21 +85,15 @@
 
 <script>
 import PaneProperty from './PaneProperty'
+import PaneInfo from './PaneInfo'
 export default {
   components: {
     PaneProperty,
+    PaneInfo,
   },
   props: {
-    value: {
-      type: Object,
-      default: undefined,
-    },
     activities: {
       type: Array,
-      default: undefined,
-    },
-    operatorConfig: {
-      type: Object,
       default: undefined,
     },
   },

@@ -1,7 +1,7 @@
 <template>
   <el-form
     v-if="props"
-    :key="value.id"
+    :key="currentNode.id"
     style="padding:0 20px; overflow:auto;"
     label-position="right"
     label-width="100px"
@@ -32,12 +32,11 @@
   </el-form>
 </template>
 <script>
+import { mapState } from 'vuex'
+
+import { operatorList } from '../../mock.js'
 export default {
   props: {
-    config: {
-      type: Object,
-      default: undefined,
-    },
     value: {
       type: Object,
       default: undefined,
@@ -49,29 +48,41 @@ export default {
     }
   },
   computed: {
+    ...mapState(['currentNode']),
     props() {
-      return this.config ? this.config.props : undefined
+      if (this.currentNode && this.currentNode.$attrs.ID) {
+        let config = operatorList.find(
+          item => String(item.id) === String(this.currentNode.$attrs.ID)
+        )
+        return config ? config.props : undefined
+      }
+      return undefined
     },
   },
   watch: {
     form: {
       handler(before, after) {
-        if (this.value) {
+        if (this.currentNode) {
           // for (let [key, value] of Object.entries(this.form)) {
           //   this.value.set(key, value)
           // }
-          this.value.set('PROPERTY', JSON.stringify(this.form))
+          this.currentNode.set('PROPERTY', JSON.stringify(this.form))
         }
       },
       deep: true,
     },
-    'value.id': {
+    // switch to a diffrent node
+    'currentNode.id': {
       handler() {
-        console.log('changed')
-        if (this.value.$attrs.PROPERTY) {
-          this.form = Object.assign({}, JSON.parse(this.value.$attrs.PROPERTY))
-        } else {
-          this.form = Object.assign({}, undefined)
+        if (this.currentNode) {
+          if (this.currentNode.$attrs.PROPERTY) {
+            this.form = Object.assign(
+              {},
+              JSON.parse(this.currentNode.$attrs.PROPERTY)
+            )
+          } else {
+            this.form = Object.assign({}, undefined)
+          }
         }
       },
       immediate: true,
