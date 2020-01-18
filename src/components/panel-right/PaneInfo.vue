@@ -4,12 +4,12 @@
   </p>
 </template>
 <script>
-import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import { operatorList } from '../../mock.js'
 export default {
   computed: {
-    ...mapState(['currentNode']),
+    ...mapGetters(['currentNode']),
     description() {
       if (this.currentNode && this.currentNode.$attrs.ID) {
         let config = operatorList.find(

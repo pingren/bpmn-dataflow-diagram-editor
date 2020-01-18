@@ -1,13 +1,17 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { getNodeById } from '../bpmn'
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    currentNode: null,
+    currentNodeId: null,
+    isRunning: false,
   },
   getters: {
-
+    currentNode: state => {
+        return getNodeById(state.currentNodeId)
+      }
   },
   mutations: {
 
@@ -16,7 +20,10 @@ const store = new Vuex.Store({
     //   state.draggingNode = draggingNode
     // },
     selectNode:(state, node) => {
-      state.currentNode = node
+      state.currentNodeId = node.id
+    },
+    startProject:(state) => {
+      state.isRunning = true
     }
   },
   actions: {

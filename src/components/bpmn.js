@@ -15,6 +15,8 @@ const ignoreList = [
   'bpmn:EndEvent',
 ]
 const processName = 'Process_1'
+// const StartEventName = 'StartEvent_1'
+// const EndEventName = 'EndEvent_1'
 
 let bpmnModeler,
   modeling,
@@ -56,6 +58,16 @@ function createBpmnModeler(container) {
     }
     return false
   })
+
+  // TODO: side efttect, this will trigger when import XML
+  eventBus.on('connection.add', 0, (event) => {
+    let el = event.element.target
+    store.commit('selectNode', el.businessObject)
+  })
+  eventBus.on('connection.changed', 0, (event) => {
+    console.log('gg')
+
+  })
 }
 
 function createNode(node, x, y) {
@@ -94,6 +106,38 @@ function createNode(node, x, y) {
     element: el,
   })
 }
+  // let obj = cli.element(StartEventName).businessObject
+
+function getNodeById(id) {
+  try{
+    return cli.element(id).businessObject
+  }
+  catch {
+    return undefined
+  }
+}
+function getChildNodes(businessObject) {
+  return businessObject.outgoing.map((ele) => ele.targetRef)
+}
+
+function getParentNodes(businessObject) {
+  return businessObject.incoming.map((ele) => ele.targetRef)
+}
+
+// TODO: connect nodes on the graph
+function setTargetNodes(businessObject, ...businessObjects) {
+
+}
+
+function getAttrs(object) {
+  try {
+    return object.$attrs
+  } catch (error) {
+    throw error
+  }
+}
+
+
 
 function setDraggingNode(node) {
   draggingNode = node
@@ -110,4 +154,8 @@ export {
   createNode,
   setDraggingNode,
   commandStack,
+  getChildNodes,
+  getParentNodes,
+  getNodeById,
+  getAttrs
 }

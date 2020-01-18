@@ -32,7 +32,7 @@
   </el-form>
 </template>
 <script>
-import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import { operatorList } from '../../mock.js'
 export default {
@@ -48,7 +48,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['currentNode']),
+    ...mapGetters(['currentNode']),
     props() {
       if (this.currentNode && this.currentNode.$attrs.ID) {
         let config = operatorList.find(

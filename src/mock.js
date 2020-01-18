@@ -97,6 +97,12 @@ export const operatorList = [
           },
         ],
       },
+      {
+        label: 'c7: parent Nodes Config 3',
+        prop: 'c7',
+        type: 'select',
+        options:[]
+      }
     ],
   },
 ]
