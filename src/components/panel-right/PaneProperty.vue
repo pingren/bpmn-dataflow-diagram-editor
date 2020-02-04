@@ -20,9 +20,9 @@
         v-model="form[item.prop]"
         :multiple="item.type === 'mselect'"
       >
-        <template v-if="item.mode === 'input'">
+        <template v-if="item.mode === 'input' && currentInput">
           <el-option
-            v-for="option in item.options"
+            v-for="option in currentInput[item.prop]"
             :key="option.value"
             :label="option.label"
             :value="option"
@@ -57,7 +57,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['currentNode']),
+    ...mapGetters(['currentNode', 'currentInput']),
     props() {
       if (this.currentNode && this.currentNode.$attrs.ID) {
         let config = operatorList.find(

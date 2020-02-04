@@ -103,6 +103,7 @@ function createBpmnModeler(container) {
     registerEvents()
   })
 }
+// TODO: remove currentNode property according to nodeInput changed
 function evaluateNodeData(businessObject, type = '', visited = []){
   if(visited.indexOf(businessObject.id) !== -1) {
     alert(`found loop in the diagram, please fix:${businessObject.name}`)

@@ -14,6 +14,9 @@ const store = new Vuex.Store({
     currentNode: state => {
         return getNodeById(state.currentNodeId)
     },
+    currentInput: state => {
+        return state.inputModel[state.currentNodeId]
+    },
     getNodeOutputById: (state) => (id) => {
       return state.outputModel[id]
     }
