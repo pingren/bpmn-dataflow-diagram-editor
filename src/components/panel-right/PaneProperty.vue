@@ -1,7 +1,6 @@
 <template>
   <el-form
     v-if="props"
-    :key="currentNode.id"
     style="padding:0 20px; overflow:auto;"
     label-position="right"
     label-width="100px"
@@ -21,20 +20,30 @@
         v-model="form[item.prop]"
         :multiple="item.type === 'mselect'"
       >
-        <el-option
-          v-for="option in item.options"
-          :key="option.value"
-          :label="option.label"
-          :value="option.value"
-        />
+        <template v-if="item.mode === 'input'">
+          <el-option
+            v-for="option in item.options"
+            :key="option.value"
+            :label="option.label"
+            :value="option"
+          />
+        </template>
+        <template>
+          <el-option
+            v-for="option in item.options"
+            :key="option.value"
+            :label="option.label"
+            :value="option"
+          />
+        </template>
       </el-select>
     </el-form-item>
   </el-form>
 </template>
 <script>
 import { mapGetters } from 'vuex'
-
 import { operatorList } from '../../mock.js'
+import { eventBus } from '../bpmn'
 export default {
   props: {
     value: {
@@ -58,35 +67,46 @@ export default {
       }
       return undefined
     },
+    formJSON() {
+      // 如果是数值则转换成字符串类型，使 JSON.stringify 格式统一不调用多次 watch
+      return JSON.stringify(this.form, (key, value) =>
+        isNaN(value) ? value : String(value)
+      )
+    },
   },
   watch: {
-    form: {
-      handler(before, after) {
-        if (this.currentNode) {
-          // for (let [key, value] of Object.entries(this.form)) {
-          //   this.value.set(key, value)
-          // }
-          this.currentNode.set('PROPERTY', JSON.stringify(this.form))
-        }
-      },
-      deep: true,
-    },
-    // switch to a diffrent node
-    'currentNode.id': {
-      handler() {
-        if (this.currentNode) {
-          if (this.currentNode.$attrs.PROPERTY) {
-            this.form = Object.assign(
-              {},
-              JSON.parse(this.currentNode.$attrs.PROPERTY)
-            )
-          } else {
-            this.form = Object.assign({}, undefined)
+    formJSON: {
+      handler(after, before) {
+        if (before !== after) {
+          // console.log('Modify Node Data:', before, '=>', after)
+          if (this.currentNode) {
+            // for (let [key, value] of Object.entries(this.form)) {
+            //   this.value.set(key, value)
+            // }
+            this.currentNode.set('PROPERTY', this.formJSON)
+            eventBus.fire('commandStack.changed', {
+              businessObject: this.currentNode,
+            })
           }
         }
       },
-      immediate: true,
     },
+  },
+  // switch to a diffrent node, using vue keep-alive
+  activated() {
+    if (this.currentNode) {
+      if (this.currentNode.$attrs.PROPERTY) {
+        this.form = Object.assign(
+          {},
+          JSON.parse(this.currentNode.$attrs.PROPERTY)
+        )
+      } else {
+        this.form = Object.assign({}, undefined)
+      }
+    }
+  },
+  deactivated() {
+    // console.log(this.currentNode.name)
   },
 }
 </script>

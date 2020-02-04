@@ -2,11 +2,11 @@
 import BpmnModeler from 'bpmn-js/lib/Modeler'
 // Cli tools 控制台工具
 import CliModule from 'bpmn-js-cli'
-
 // customization 自定义模块
 import CustomModule from './module'
 
 import store from './model/store'
+import { operatorList } from '../mock'
 const ignoreList = [
   'bpmn:Process',
   'bpmn:SequenceFlow',
@@ -24,10 +24,12 @@ let bpmnModeler,
   overlays,
   eventBus,
   interactionEvents,
-  commandStack
+  commandStack,
+  cli, draggingNode
 
-let cli, draggingNode
+let addFlag, removeTargetNode
 
+// TODO: add debug helper & diagram debug helper
 function createBpmnModeler(container) {
   bpmnModeler = new BpmnModeler({
     container: container,
@@ -49,27 +51,143 @@ function createBpmnModeler(container) {
   commandStack = bpmnModeler.get('commandStack')
   cli = window.cli
 
-  eventBus.on('element.click', 0, event => {
-    // return false // will cancel event
-    let el = event.element
-    if (ignoreList.indexOf(el.type) === -1) {
+  function registerEvents() {
+    // click event: fire vuex mutation 'selectNode' with clicked node id
+    eventBus.on('element.click', 0, event => {
+      // return false // will cancel event
+      let el = event.element
+      if (ignoreList.indexOf(el.type) === -1) {
+        if(store.state.currentNodeId !== el.businessObject.id) {
+          store.commit('selectNode', el.businessObject)
+        }
+        return true
+      }
+      return false
+    })
+    // connection event: fire vuex mutation 'selectNode' with target node id
+    eventBus.on('connection.add', 0, (event) => {
+      let el = event.element.target
       store.commit('selectNode', el.businessObject)
-      return true
-    }
-    return false
-  })
+    })
+    // connection events: fire evaluateNodeData when connection logic changed
+    eventBus.on(['connection.added','connection.remove','connection.changed'], 1000, (event) => {
+      if(event.type === 'connection.added'){
+        addFlag = true
 
-  // TODO: side efttect, this will trigger when import XML
-  eventBus.on('connection.add', 0, (event) => {
-    let el = event.element.target
-    store.commit('selectNode', el.businessObject)
-  })
-  eventBus.on('connection.changed', 0, (event) => {
-    console.log('gg')
-
+      } else if(addFlag === true && event.type === 'connection.changed') {
+        // addFlag is an ugly fix since targetRef will be undefined at first place
+        // call evaluateNodeData when new connection created,
+        evaluateNodeData(event.element.businessObject.targetRef, 'newConnectionToNode')
+        addFlag = false
+      }
+      if(event.type === 'connection.remove') {
+        removeTargetNode = event.element.businessObject.targetRef
+      }
+    })
+    // commandStack event will fire when node attrs change and
+    eventBus.on('commandStack.changed', 0 , event =>{
+      if(event.businessObject){
+        // let childNodes = getChildNodes(event.businessObject)
+        evaluateNodeData(event.businessObject, 'nodeAttrsChanged')
+      }
+      if(removeTargetNode){
+        // removeTargetNode is an ugly fix similar to addFlag
+        // call evaluateNodeData when a connection removed
+        evaluateNodeData(removeTargetNode, 'connectionRemoved')
+        removeTargetNode = undefined
+      }
+    })
+  }
+  // import done, register eventBus event
+  eventBus.on('import.render.complete', 0, _ =>{
+    registerEvents()
   })
 }
+function evaluateNodeData(businessObject, type = '', visited = []){
+  if(visited.indexOf(businessObject.id) !== -1) {
+    alert(`found loop in the diagram, please fix:${businessObject.name}`)
+    return
+  }
+  if (ignoreList.indexOf(businessObject.$type) !== -1) {
+    return
+  }
+  // let parentNodes = getParentNodes(businessObject)
+  // console.log('input:',parentNodes)
+  // let childNodes = getChildNodes(businessObject)
+  // console.log('output:', childNodes)
 
+  let id = businessObject.id
+  let operatorId = getAttrs(businessObject).ID
+  let property = getProperty(businessObject)
+
+  let config = operatorList.find(
+    item => String(item.id) === String(operatorId)
+  )
+  if(config){
+  console.log(type,": ",businessObject.name, config.input,config.output)
+    if(config.input) {
+      let parentNodes = getParentNodes(businessObject)
+      // console.log('parentNodes:', parentNodes)
+      let parentOutputs = parentNodes.map(node => store.getters.getNodeOutputById(node.id)).filter(item => item !== {} && item !== undefined)
+      // console.log('parentOuputs:', parentOutputs)
+      // evaluateNodeInput from parents' output according to config.input
+      // config.input is an array of object, pick sepcific key arrays as nodeInput, and flatmap if needed
+      // Example: input:[{key: ['c7-1','c7-2'], target: 'c7',mode: 'flatMap'}] means pick 'c7-1','c7-2', flatten result into c7
+      // flatMap
+      let resultObject = config.input.reduce((result, inputEntry) => {
+        let currentObj
+        if(inputEntry.key && inputEntry.target) {
+          // let outKey = outputEntry.rename ? outputEntry.rename : outputEntry.key
+          // currentObj = {[inputEntry.target]: property[outputEntry.key]}
+          let keys = inputEntry.key
+          if(typeof keys === 'string'){
+            keys = [keys]
+          }
+          currentObj = parentOutputs.flatMap(output => keys.flatMap(key => output[key] ? output[key] : []))
+          return Object.assign(result, {[inputEntry.target] : currentObj})
+        }
+      }, {})
+      // if input Change commit to the vuex
+      if(resultObject && diff(resultObject, store.state.inputModel[id])) {
+        // console.log('nodeInput', resultObject)
+        store.commit('setInput', {id, obj: resultObject})
+      }
+    }
+    if(config.output) {
+      // evaluateNodeOuput from property according to config.output
+      // config.output is an array of object, pick specific keys to nodeOutput, and maybe do a rename
+      // Example: [{key:'option3',rename:'c7' }] means pick 'option3', and rename it to c7.
+      // reduce
+      //  note this will override entry with same keys, so keep diffrent keys by using rename
+      let resultObject = config.output.reduce((result, outputEntry) => {
+        let currentObj
+        if(outputEntry.key && property[outputEntry.key]) {
+          let outKey = outputEntry.rename ? outputEntry.rename : outputEntry.key
+          currentObj = {[outKey]: property[outputEntry.key]}
+        }
+        return Object.assign(result, currentObj)
+      }, {})
+
+      // if output Change commit to the vuex
+      if(resultObject && diff(resultObject, store.state.outputModel[id])) {
+        // console.log('nodeOutput', resultObject)
+        store.commit('setOutput', {id, obj: resultObject})
+      }
+      // if output change evalute all Child Nodes ? or related child nodes
+      let childNodes = getChildNodes(businessObject)
+      // console.log('childNodes:', childNodes)
+      if(childNodes.length){
+        childNodes.forEach(node => {
+          evaluateNodeData(node, 'dfs', visited.concat(businessObject.id))
+        })
+      }
+    }
+  }
+
+}
+function diff(obj1, obj2) {
+  return JSON.stringify(obj1) !== JSON.stringify(obj2)
+}
 function createNode(node, x, y) {
   let viewbox = canvas.viewbox()
   let id = cli.create(
@@ -117,11 +235,21 @@ function getNodeById(id) {
   }
 }
 function getChildNodes(businessObject) {
+  try {
   return businessObject.outgoing.map((ele) => ele.targetRef)
+  }
+  catch {
+    return []
+  }
 }
 
 function getParentNodes(businessObject) {
-  return businessObject.incoming.map((ele) => ele.targetRef)
+  try {
+    return businessObject.incoming.map((ele) => ele.sourceRef)
+  }
+  catch {
+    return []
+  }
 }
 
 // TODO: connect nodes on the graph
@@ -129,9 +257,17 @@ function setTargetNodes(businessObject, ...businessObjects) {
 
 }
 
-function getAttrs(object) {
+function getAttrs(businessObject) {
   try {
-    return object.$attrs
+    return businessObject.$attrs
+  } catch (error) {
+    throw error
+  }
+}
+
+function getProperty(businessObject) {
+  try {
+    return JSON.parse(businessObject.$attrs.PROPERTY)
   } catch (error) {
     throw error
   }

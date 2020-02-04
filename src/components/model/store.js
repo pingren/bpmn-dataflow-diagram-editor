@@ -7,14 +7,18 @@ const store = new Vuex.Store({
   state: {
     currentNodeId: null,
     isRunning: false,
+    inputModel: {},
+    outputModel: {},
   },
   getters: {
     currentNode: state => {
         return getNodeById(state.currentNodeId)
-      }
+    },
+    getNodeOutputById: (state) => (id) => {
+      return state.outputModel[id]
+    }
   },
   mutations: {
-
     // update current dragging element: from panel-right into diagram editor
     // draggingNode: (state, draggingNode) => {
     //   state.draggingNode = draggingNode
@@ -24,6 +28,12 @@ const store = new Vuex.Store({
     },
     startProject:(state) => {
       state.isRunning = true
+    },
+    setInput:(state, payload) => {
+      state.inputModel[payload.id] = payload.obj
+    },
+    setOutput:(state, payload) => {
+      state.outputModel[payload.id] = payload.obj
     }
   },
   actions: {

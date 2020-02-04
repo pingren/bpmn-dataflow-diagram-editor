@@ -29,7 +29,10 @@
           <PaneInfo />
         </div>
       </el-submenu>
-      <el-submenu index="2">
+      <el-submenu
+        v-if="currentNode"
+        index="2"
+      >
         <template slot="title">
           <i class="el-icon-edit-outline" />
           <span slot="title">Property
@@ -41,7 +44,9 @@
             isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 35px);'
           "
         >
-          <PaneProperty />
+          <keep-alive>
+            <PaneProperty :key="currentNode.id" />
+          </keep-alive>
         </el-menu-item-group>
       </el-submenu>
       <el-submenu
@@ -86,6 +91,7 @@
 <script>
 import PaneProperty from './PaneProperty'
 import PaneInfo from './PaneInfo'
+import { mapGetters } from 'vuex'
 export default {
   components: {
     PaneProperty,
@@ -102,6 +108,9 @@ export default {
       isCollapse: false,
       radio: '1',
     }
+  },
+  computed: {
+    ...mapGetters(['currentNode']),
   },
   watch: {
     activities() {
