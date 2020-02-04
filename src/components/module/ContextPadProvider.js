@@ -1,3 +1,6 @@
+// Customization Begin
+// delete most unused entries
+// Customization End
 import { assign, isArray } from 'min-dash'
 
 import { is } from 'bpmn-js/lib/util/ModelUtil'
@@ -44,9 +47,10 @@ export default function ContextPadProvider(
   }
 
   eventBus.on('create.end', 250, function(event) {
-    var shape = event.context.shape
+    var context = event.context;
+    var shape = context.shape;
 
-    if (!hasPrimaryModifier(event)) {
+    if (!hasPrimaryModifier(event) || !contextPad.isOpen(shape)) {
       return
     }
 

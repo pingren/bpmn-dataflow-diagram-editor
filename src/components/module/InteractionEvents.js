@@ -1,3 +1,5 @@
+// Customization Begin
+// fire event is customized, ignore event.type === 'label'
 import { forEach, assign } from 'min-dash'
 
 import {
@@ -16,6 +18,7 @@ import {
 } from 'tiny-svg'
 
 import { createLine, updateLine } from 'diagram-js/lib/util/RenderUtil'
+// Customization End
 
 function allowAll(e) {
   return true
@@ -75,7 +78,7 @@ export default function InteractionEvents(eventBus, elementRegistry, styles) {
     if (!gfx || !element) {
       return
     }
-    // 禁用标签拖动
+    // disbale label dragging 禁用标签拖动
     if (element.type === 'label') {
       return
     }
