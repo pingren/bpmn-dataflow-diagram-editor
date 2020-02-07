@@ -13,17 +13,20 @@
     >
       <el-input
         v-if="item.type === 'input'"
-        v-model="form[item.prop]"
+        :value="form[item.prop]"
+        @input="value => updateTransferModel(item.prop, value)"
       />
       <el-select
         v-if="['select','mselect'].indexOf(item.type) !== -1"
-        v-model="form[item.prop]"
+        :value="form[item.prop]"
         :multiple="item.type === 'mselect'"
+        @input="value => updateTransferModel(item.prop, value)"
       >
         <template v-if="item.mode === 'input' && currentInput">
           <el-option
             v-for="option in currentInput[item.prop]"
             :key="option.value"
+            :value-key="option.value"
             :label="option.label"
             :value="option"
           />
@@ -32,6 +35,7 @@
           <el-option
             v-for="option in item.options"
             :key="option.value"
+            :value-key="option.value"
             :label="option.label"
             :value="option"
           />
@@ -41,9 +45,9 @@
   </el-form>
 </template>
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'vuex'
 import { operatorList } from '../../mock.js'
-import { eventBus } from '../bpmn'
+import { getNodeById } from '../bpmn'
 export default {
   props: {
     value: {
@@ -53,11 +57,25 @@ export default {
   },
   data: function() {
     return {
-      form: {},
+      id: undefined,
     }
   },
   computed: {
-    ...mapGetters(['currentNode', 'currentInput']),
+    ...mapState(['currentNodeId', 'inputModel', 'transferModel']),
+    currentNode() {
+      return getNodeById(this.id)
+    },
+    currentInput() {
+      return this.inputModel[this.id]
+    },
+    form: {
+      get() {
+        return this.transferModel[this.id]
+      },
+      set(value) {
+        this.$store.commit('setTransfer', { id: this.id, obj: value })
+      },
+    },
     props() {
       if (this.currentNode && this.currentNode.$attrs.ID) {
         let config = operatorList.find(
@@ -67,46 +85,23 @@ export default {
       }
       return undefined
     },
-    formJSON() {
-      // 如果是数值则转换成字符串类型，使 JSON.stringify 格式统一不调用多次 watch
-      return JSON.stringify(this.form, (key, value) =>
-        isNaN(value) ? value : String(value)
-      )
-    },
-  },
-  watch: {
-    formJSON: {
-      handler(after, before) {
-        if (before !== after) {
-          // console.log('Modify Node Data:', before, '=>', after)
-          if (this.currentNode) {
-            // for (let [key, value] of Object.entries(this.form)) {
-            //   this.value.set(key, value)
-            // }
-            this.currentNode.set('PROPERTY', this.formJSON)
-            eventBus.fire('commandStack.changed', {
-              businessObject: this.currentNode,
-            })
-          }
-        }
-      },
-    },
   },
   // switch to a diffrent node, using vue keep-alive
   activated() {
-    if (this.currentNode) {
-      if (this.currentNode.$attrs.PROPERTY) {
-        this.form = Object.assign(
-          {},
-          JSON.parse(this.currentNode.$attrs.PROPERTY)
-        )
-      } else {
-        this.form = Object.assign({}, undefined)
+    if (this.currentNodeId) {
+      this.id = this.currentNodeId
+      if (this.form === undefined) {
+        this.form = {}
       }
     }
   },
   deactivated() {
     // console.log(this.currentNode.name)
+  },
+  methods: {
+    updateTransferModel(key, value) {
+      this.$store.commit('setTransfer', { id: this.id, key, obj: value })
+    },
   },
 }
 </script>

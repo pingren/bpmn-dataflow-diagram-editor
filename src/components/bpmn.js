@@ -15,7 +15,7 @@ const ignoreList = [
   'bpmn:EndEvent',
 ]
 const processName = 'Process_1'
-// const StartEventName = 'StartEvent_1'
+const StartEventName = 'StartEvent_1'
 // const EndEventName = 'EndEvent_1'
 
 let bpmnModeler,
@@ -98,93 +98,128 @@ function createBpmnModeler(container) {
       }
     })
   }
+  function unregisterEvents() {
+    eventBus.off(['connection.add'])
+  }
   // import done, register eventBus event
-  eventBus.on('import.render.complete', 0, _ =>{
+  eventBus.on('import.done', 0, () => {
+    initModel()
     registerEvents()
   })
+  // disable eventBus if import mutiple times
+  eventBus.on('import.render.start', 0, unregisterEvents)
 }
-// TODO: remove currentNode property according to nodeInput changed
+// init transferModel & visit from StartEventName to get all nodes input & output & transfer
+// TODO: use bfs instead
+function initModel(){
+  function getProperty(businessObject) {
+    try {
+      if(businessObject.$attrs.PROPERTY){
+        return JSON.parse(businessObject.$attrs.PROPERTY)
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+  let nodes = cli.elements().flatMap(id => {
+    let ele = cli.element(id).businessObject
+    return ignoreList.indexOf(ele.$type) === -1 ? ele : []
+  })
+  for(let node of nodes) {
+    store.commit('setTransfer', { id: node.id, obj: getProperty(node), init: true })
+  }
+  if(nodes.length > 0) {
+    evaluateNodeData(cli.element(StartEventName).businessObject)
+  }
+}
+// evaluateNodeInput from parents' nodeOutput according to config.input & then updateTransfer
+function evaluateNodeInput(id) {
+
+  let node = getNodeById(id)
+  let operatorId = getAttrs(node).ID
+  let config = operatorList.find(
+    item => String(item.id) === String(operatorId)
+  )
+  if(config.input) {
+    let parentNodes = getParentNodes(node)
+    // console.log('parentNodes:', parentNodes)
+    let parentOutputs = parentNodes.map(node => store.state.outputModel[node.id]).filter(item => item !== {} && item !== undefined)
+    // console.log('parentOuputs:', parentOutputs)
+    // config.input is an array of object, pick sepcific key arrays as nodeInput, and flatmap if needed
+    // Example: input:[{key: ['c7-1','c7-2'], target: 'c7',mode: 'flatMap'}] means pick 'c7-1','c7-2', flatten result into c7
+    // flatMap
+    let resultObject = config.input.reduce((result, inputEntry) => {
+      let currentObj
+      if(inputEntry.key && inputEntry.target) {
+        let keys = inputEntry.key
+        if(typeof keys === 'string'){
+          keys = [keys]
+        }
+        currentObj = parentOutputs.flatMap(output => keys.flatMap(key => output[key] ? output[key] : []))
+        return Object.assign(result, {[inputEntry.target] : currentObj})
+      }
+    }, {})
+    // if input Change commit to the vuex
+    if(resultObject && diff(resultObject, store.state.inputModel[id])) {
+      // console.log('nodeInput', resultObject)
+      store.commit('setInput', {id, obj: resultObject})
+      store.commit('updateTransfer', {id})
+    }
+  }
+}
+// evaluateNodeOuput from nodeTransfer according to config.output
+function evaluateNodeOutput(id){
+
+  let node = getNodeById(id)
+  let operatorId = getAttrs(node).ID
+  let property = store.state.transferModel[id]
+
+  let config = operatorList.find(
+    item => String(item.id) === String(operatorId)
+  )
+  if(config.output) {
+    // config.output is an array of object, pick specific keys to nodeOutput, and maybe do a rename
+    // Example: [{key:'option3',rename:'c7' }] means pick 'option3', and rename it to c7.
+    // reduce
+    //  note this will override entry with same keys, so keep diffrent output keys by using rename
+    let resultObject = config.output.reduce((result, outputEntry) => {
+      let currentObj
+      if(outputEntry.key && property[outputEntry.key]) {
+        let outKey = outputEntry.rename ? outputEntry.rename : outputEntry.key
+        currentObj = {[outKey]: property[outputEntry.key]}
+      }
+      return Object.assign(result, currentObj)
+    }, {})
+
+    // if output Change commit to the vuex
+    if(resultObject && diff(resultObject, store.state.outputModel[id])) {
+      // console.log('nodeOutput', resultObject)
+      store.commit('setOutput', {id, obj: resultObject})
+    }
+  }
+}
+// dfs eval nodes , maybe buggy, so to be removed
 function evaluateNodeData(businessObject, type = '', visited = []){
   if(visited.indexOf(businessObject.id) !== -1) {
     alert(`found loop in the diagram, please fix:${businessObject.name}`)
     return
   }
-  if (ignoreList.indexOf(businessObject.$type) !== -1) {
-    return
-  }
-  // let parentNodes = getParentNodes(businessObject)
-  // console.log('input:',parentNodes)
-  // let childNodes = getChildNodes(businessObject)
-  // console.log('output:', childNodes)
-
   let id = businessObject.id
-  let operatorId = getAttrs(businessObject).ID
-  let property = getProperty(businessObject)
-
-  let config = operatorList.find(
-    item => String(item.id) === String(operatorId)
-  )
-  if(config){
-  console.log(type,": ",businessObject.name, config.input,config.output)
-    if(config.input) {
-      let parentNodes = getParentNodes(businessObject)
-      // console.log('parentNodes:', parentNodes)
-      let parentOutputs = parentNodes.map(node => store.getters.getNodeOutputById(node.id)).filter(item => item !== {} && item !== undefined)
-      // console.log('parentOuputs:', parentOutputs)
-      // evaluateNodeInput from parents' output according to config.input
-      // config.input is an array of object, pick sepcific key arrays as nodeInput, and flatmap if needed
-      // Example: input:[{key: ['c7-1','c7-2'], target: 'c7',mode: 'flatMap'}] means pick 'c7-1','c7-2', flatten result into c7
-      // flatMap
-      let resultObject = config.input.reduce((result, inputEntry) => {
-        let currentObj
-        if(inputEntry.key && inputEntry.target) {
-          // let outKey = outputEntry.rename ? outputEntry.rename : outputEntry.key
-          // currentObj = {[inputEntry.target]: property[outputEntry.key]}
-          let keys = inputEntry.key
-          if(typeof keys === 'string'){
-            keys = [keys]
-          }
-          currentObj = parentOutputs.flatMap(output => keys.flatMap(key => output[key] ? output[key] : []))
-          return Object.assign(result, {[inputEntry.target] : currentObj})
-        }
-      }, {})
-      // if input Change commit to the vuex
-      if(resultObject && diff(resultObject, store.state.inputModel[id])) {
-        // console.log('nodeInput', resultObject)
-        store.commit('setInput', {id, obj: resultObject})
-      }
-    }
-    if(config.output) {
-      // evaluateNodeOuput from property according to config.output
-      // config.output is an array of object, pick specific keys to nodeOutput, and maybe do a rename
-      // Example: [{key:'option3',rename:'c7' }] means pick 'option3', and rename it to c7.
-      // reduce
-      //  note this will override entry with same keys, so keep diffrent keys by using rename
-      let resultObject = config.output.reduce((result, outputEntry) => {
-        let currentObj
-        if(outputEntry.key && property[outputEntry.key]) {
-          let outKey = outputEntry.rename ? outputEntry.rename : outputEntry.key
-          currentObj = {[outKey]: property[outputEntry.key]}
-        }
-        return Object.assign(result, currentObj)
-      }, {})
-
-      // if output Change commit to the vuex
-      if(resultObject && diff(resultObject, store.state.outputModel[id])) {
-        // console.log('nodeOutput', resultObject)
-        store.commit('setOutput', {id, obj: resultObject})
-      }
-      // if output change evalute all Child Nodes ? or related child nodes
-      let childNodes = getChildNodes(businessObject)
-      // console.log('childNodes:', childNodes)
-      if(childNodes.length){
-        childNodes.forEach(node => {
-          evaluateNodeData(node, 'dfs', visited.concat(businessObject.id))
-        })
-      }
-    }
+  console.log(type, ": ",businessObject.name)
+  if (ignoreList.indexOf(businessObject.$type) === -1) {
+    evaluateNodeInput(id)
+    evaluateNodeOutput(id)
   }
+  // if output change then evaluate all Child Nodes
 
+  // TODO: remove this, use BFS instead
+  let childNodes = getChildNodes(businessObject)
+  // console.log('childNodes:', childNodes)
+  if(childNodes.length){
+    childNodes.forEach(node => {
+      evaluateNodeData(node, 'dfs', visited.concat(id))
+    })
+  }
 }
 function diff(obj1, obj2) {
   return JSON.stringify(obj1) !== JSON.stringify(obj2)
@@ -243,7 +278,6 @@ function getChildNodes(businessObject) {
     return []
   }
 }
-
 function getParentNodes(businessObject) {
   try {
     return businessObject.incoming.map((ele) => ele.sourceRef)
@@ -254,6 +288,7 @@ function getParentNodes(businessObject) {
 }
 
 // TODO: connect nodes on the graph
+// eslint-disable-next-line
 function setTargetNodes(businessObject, ...businessObjects) {
 
 }
@@ -265,16 +300,6 @@ function getAttrs(businessObject) {
     throw error
   }
 }
-
-function getProperty(businessObject) {
-  try {
-    return JSON.parse(businessObject.$attrs.PROPERTY)
-  } catch (error) {
-    throw error
-  }
-}
-
-
 
 function setDraggingNode(node) {
   draggingNode = node
@@ -294,5 +319,4 @@ export {
   getChildNodes,
   getParentNodes,
   getNodeById,
-  getAttrs
 }
