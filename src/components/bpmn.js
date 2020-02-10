@@ -110,7 +110,6 @@ function createBpmnModeler(container) {
   eventBus.on('import.render.start', 0, unregisterEvents)
 }
 // init transferModel & visit from StartEventName to get all nodes input & output & transfer
-// TODO: use bfs instead
 function initModel(){
   function getProperty(businessObject) {
     try {
@@ -198,8 +197,38 @@ function evaluateNodeOutput(id){
     }
   }
 }
-// dfs eval nodes , maybe buggy, so to be removed
-function evaluateNodeData(businessObject, type = '', visited = []){
+
+// Promise helper
+Promise.each = async function(arr, fn) { // take an array and a function
+  for(const item of arr) await fn(item);
+}
+
+// bfs eval nodes asynchronously
+function evaluateNodeData(nodesToVisit, type = ''){
+  // TODO: use DFS check if there is a loop in the diagram before continue
+  if(nodesToVisit.length === undefined && nodesToVisit.id) {
+    nodesToVisit = [nodesToVisit]
+  }
+  let nodesBatch = nodesToVisit;
+  nodesToVisit = [];
+  Promise.each(nodesBatch, node => {
+      console.log(node.id, node.name, type);
+      if (ignoreList.indexOf(node.$type) === -1) {
+        evaluateNodeInput(node.id)
+        evaluateNodeOutput(node.id)
+      }
+      let childNodes = getChildNodes(node)
+      nodesToVisit = nodesToVisit.concat(childNodes)
+  }).then(function() {
+    if(nodesToVisit.length > 0) {
+      evaluateNodeData(nodesToVisit, "bfs")
+    }
+  })
+}
+
+// DEPRECATED: dfs eval nodes
+// eslint-disable-next-line
+function evaluateNodeDataDFS(businessObject, type = '', visited = []){
   if(visited.indexOf(businessObject.id) !== -1) {
     alert(`found loop in the diagram, please fix:${businessObject.name}`)
     return
@@ -212,7 +241,6 @@ function evaluateNodeData(businessObject, type = '', visited = []){
   }
   // if output change then evaluate all Child Nodes
 
-  // TODO: remove this, use BFS instead
   let childNodes = getChildNodes(businessObject)
   // console.log('childNodes:', childNodes)
   if(childNodes.length){

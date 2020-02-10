@@ -57,7 +57,7 @@ const store = new Vuex.Store({
         )
         let node = getNodeById(payload.id)
         node.set('PROPERTY', newTransferJSON)
-        // TODO: if not init loading, BFS to update all child nodes
+        // if not init loading, BFS to update all child nodes
         if(!payload.init) {
           eventBus.fire('commandStack.changed', {
             businessObject: node,
