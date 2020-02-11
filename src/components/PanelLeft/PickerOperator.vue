@@ -11,8 +11,8 @@
 </template>
 
 <script>
-import { setDraggingNode } from '../../bpmn'
 export default {
+  inject: ['diagram'],
   data() {
     return {
       data: [
@@ -60,7 +60,7 @@ export default {
   methods: {
     handleDragStart(node, ev) {
       node.data.type = 'bpmn:ScriptTask'
-      setDraggingNode(node)
+      this.diagram().setDraggingNode(node)
     },
     allowDrop(draggingNode, dropNode, type) {
       return false

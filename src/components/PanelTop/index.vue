@@ -62,9 +62,8 @@
   </div>
 </template>
 <script>
-import { commandStack, cli, importXML, exportXML } from '../../bpmn'
-
 export default {
+  inject: ['diagram'],
   data() {
     return {
       drawerVisible: false,
@@ -73,10 +72,10 @@ export default {
   },
   computed: {
     canUndo() {
-      return commandStack ? commandStack.canUndo() : false
+      return this.diagram() ? this.diagram().commandStack.canUndo() : false
     },
     canRedo() {
-      return commandStack ? commandStack.canRedo() : false
+      return this.diagram() ? this.diagram().commandStack.canRedo() : false
     },
   },
   methods: {
@@ -84,7 +83,8 @@ export default {
     run() {},
     // Saving DEMO
     save() {
-      exportXML()
+      this.diagram()
+        .exportXML()
         .then(xml => {
           this.drawerVisible = true
           this.drawerContent = xml
@@ -113,17 +113,19 @@ export default {
       if (result === null) {
         return
       }
-      importXML(result).catch(_ => {
-        this.$message.error(
-          'Loading Error Please Check XML. 读取失败请检查 XML 格式!'
-        )
-      })
+      this.diagram()
+        .importXML(result)
+        .catch(_ => {
+          this.$message.error(
+            'Loading Error Please Check XML. 读取失败请检查 XML 格式!'
+          )
+        })
     },
     undo() {
-      cli.undo()
+      this.diagram().cli.undo()
     },
     redo() {
-      cli.redo()
+      this.diagram().cli.redo()
     },
   },
 }

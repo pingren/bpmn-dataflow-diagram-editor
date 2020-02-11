@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { getNodeById, eventBus } from '../bpmn'
+// import { getNodeById, eventBus } from '../bpmn'
 Vue.use(Vuex)
 
 function obj2JSON(obj) {
@@ -20,7 +20,8 @@ const store = new Vuex.Store({
   },
   getters: {
     currentNode: state => {
-        return getNodeById(state.currentNodeId)
+      // TODO: need fix logic for Diagram.js
+      // return getNodeById(state.currentNodeId)
     },
   },
   mutations: {
@@ -59,7 +60,10 @@ const store = new Vuex.Store({
           '=>',
           newTransferJSON
         )
-        let node = getNodeById(payload.id)
+        // TODO: need fix class object logic for Diagram.js
+
+        /*
+        // let node = getNodeById(payload.id)
         node.set('PROPERTY', newTransferJSON)
         // if not init loading, BFS to update all child nodes
         if(!payload.init) {
@@ -67,6 +71,7 @@ const store = new Vuex.Store({
             businessObject: node,
           })
         }
+        */
       }
     },
     updateTransfer:(state, payload) => {

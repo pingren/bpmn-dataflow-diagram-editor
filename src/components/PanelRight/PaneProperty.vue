@@ -47,8 +47,8 @@
 <script>
 import { mapState } from 'vuex'
 import { operatorList } from '../../mock.js'
-import { getNodeById } from '../../bpmn'
 export default {
+  inject: ['diagram'],
   props: {
     value: {
       type: Object,
@@ -63,7 +63,7 @@ export default {
   computed: {
     ...mapState(['currentNodeId', 'inputModel', 'transferModel']),
     currentNode() {
-      return getNodeById(this.id)
+      return this.diagram().getNodeById(this.id)
     },
     currentInput() {
       return this.inputModel[this.id]

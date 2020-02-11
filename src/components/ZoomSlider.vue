@@ -12,9 +12,8 @@
   />
 </template>
 <script>
-import { canvas } from '../bpmn'
-
 export default {
+  inject: ['diagram'],
   computed: {
     zoomLevel: {
       get() {
@@ -27,7 +26,7 @@ export default {
   },
   methods: {
     slide(val) {
-      canvas.zoom(val)
+      this.diagram().canvas.zoom(val)
     },
   },
 }

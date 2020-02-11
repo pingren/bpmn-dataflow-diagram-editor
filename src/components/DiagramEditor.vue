@@ -1,50 +1,66 @@
 <template>
-  <div
-    ref="content"
-    style="width:100%;height:100%;"
-    class="containers"
-    @dragover.stop="dragover_handler"
-    @drop.stop="drop_handler"
-  />
+  <el-container>
+    <PanelLeft />
+    <PanelTop />
+    <PanelRight />
+    <ZoomSlider style="position:absolute; bottom:100px;left: 300px;" />
+    <div
+      ref="content"
+      style="height:calc(100vh - 25px);width:100%;"
+      class="containers"
+      @dragover.stop="dragover_handler"
+      @drop.stop="drop_handler"
+    />
+  </el-container>
 </template>
 <script>
+import PanelLeft from './PanelLeft'
+import PanelRight from './PanelRight'
+import PanelTop from './PanelTop'
+import ZoomSlider from './ZoomSlider'
 // default BPMN graph
 import diagramXML from '../../resources/diagram.bpmn'
-import {
-  createBpmnModeler,
-  draggingNode,
-  setDraggingNode,
-  createNode,
-  importXML,
-} from '../bpmn'
-
+import Diagram from '../Diagram'
 export default {
-  data() {
+  components: {
+    ZoomSlider,
+    PanelLeft,
+    PanelRight,
+    PanelTop,
+  },
+  // provide for child components inject the diagram object
+  provide() {
     return {
-      drawerVisible: false,
-      drawerContent: undefined,
+      diagram: this.getDiagram,
     }
   },
-  computed: {
-    // ...mapState(['bpmnModeler', 'draggingNode', 'eventBus']),
-    // ...mapGetters(['modeling', 'commandStack', 'canvas', 'cli']),
+  data() {
+    return {
+      diagram: undefined,
+    }
   },
   mounted() {
-    createBpmnModeler(this.$refs.content)
-    // imoprt default diagram
-    importXML(diagramXML)
+    this.diagram = new Diagram(this.$refs.content)
+    this.diagram.importXML(diagramXML)
   },
   methods: {
+    getDiagram() {
+      return this.diagram
+    },
     dragover_handler(event) {
       event.preventDefault()
     },
     drop_handler(event) {
       event.preventDefault()
-      if (!draggingNode) {
+      if (!this.diagram.draggingNode) {
         return
       }
-      createNode(draggingNode, event.offsetX, event.offsetY)
-      setDraggingNode(null)
+      this.diagram.createNode(
+        this.diagram.draggingNode,
+        event.offsetX,
+        event.offsetY
+      )
+      this.diagram.setDraggingNode(null)
     },
   },
 }
