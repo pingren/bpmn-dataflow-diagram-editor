@@ -25,6 +25,8 @@ let bpmnModeler,
   eventBus,
   interactionEvents,
   commandStack,
+  selection,
+  zoomScroll,
   cli, draggingNode
 
 let addFlag, removeTargetNode
@@ -49,20 +51,29 @@ function createBpmnModeler(container) {
   eventBus = bpmnModeler.get('eventBus')
   interactionEvents = bpmnModeler.get('interactionEvents')
   commandStack = bpmnModeler.get('commandStack')
+  selection = bpmnModeler.get('selection')
+  zoomScroll = bpmnModeler.get('zoomScroll')
+  // disable mouse wheel scroll but keep zoom
+  // eslint-disable-next-line
+  zoomScroll.__proto__.scroll = () => {}
   cli = window.cli
 
   function registerEvents() {
     // click event: fire vuex mutation 'selectNode' with clicked node id
     eventBus.on('element.click', 0, event => {
-      // return false // will cancel event
       let el = event.element
       if (ignoreList.indexOf(el.type) === -1) {
-        if(store.state.currentNodeId !== el.businessObject.id) {
+        // make sure not mutiple elements selected
+        let els = selection.get()
+        if(store.state.currentNodeId !== el.businessObject.id && els.length === 1) {
           store.commit('selectNode', el.businessObject)
         }
         return true
       }
-      return false
+      else {
+        // return false will cancel event
+        return false
+      }
     })
     // connection event: fire vuex mutation 'selectNode' with target node id
     eventBus.on('connection.add', 0, (event) => {
@@ -103,11 +114,49 @@ function createBpmnModeler(container) {
   }
   // import done, register eventBus event
   eventBus.on('import.done', 0, () => {
+    let attrs = getAttrs(cli.element(processName).businessObject)
+    if(Object.keys(attrs).length !== 0){
+      // canvas.zoom(attrs.scale)
+      store.commit('setZoomLevel', attrs.scale)
+      canvas.viewbox(attrs)
+    }else {
+      store.commit('setZoomLevel', 1)
+    }
     initModel()
     registerEvents()
   })
   // disable eventBus if import mutiple times
   eventBus.on('import.render.start', 0, unregisterEvents)
+}
+function importXML(xml){
+  return new Promise(
+    (resolve, reject) => {
+      bpmnModeler.importXML(xml, err => {
+      if (err) {
+          reject(err)
+      }
+      resolve()
+    })
+    })
+}
+function exportXML(){
+  let rootNode = window.cli.element(processName).businessObject
+  let viewbox = canvas.viewbox()
+  rootNode.set('x', viewbox.x)
+  rootNode.set('y', viewbox.y)
+  rootNode.set('width', viewbox.width)
+  rootNode.set('height', viewbox.height)
+  rootNode.set('scale', viewbox.scale)
+  return new Promise(
+    (resolve, reject) => {
+      bpmnModeler.saveXML({ format: true }, (err, xml) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(xml)
+      })
+    }
+  )
 }
 // init transferModel & visit from StartEventName to get all nodes input & output & transfer
 function initModel(){
@@ -253,12 +302,14 @@ function diff(obj1, obj2) {
   return JSON.stringify(obj1) !== JSON.stringify(obj2)
 }
 function createNode(node, x, y) {
+  // console.log(canvas.viewbox(), canvas._cachedViewbox)
   let viewbox = canvas.viewbox()
+  let scale = viewbox.scale
   let id = cli.create(
     node.data.type,
     {
-      x: x + viewbox.x,
-      y: y + viewbox.y,
+      x: x / scale + viewbox.x,
+      y: y / scale + viewbox.y,
     },
     processName
   )
@@ -288,7 +339,6 @@ function createNode(node, x, y) {
     element: el,
   })
 }
-  // let obj = cli.element(StartEventName).businessObject
 
 function getNodeById(id) {
   try{
@@ -344,7 +394,8 @@ export {
   createNode,
   setDraggingNode,
   commandStack,
-  getChildNodes,
-  getParentNodes,
   getNodeById,
+  zoomScroll,
+  importXML,
+  exportXML
 }

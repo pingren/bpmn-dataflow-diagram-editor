@@ -62,7 +62,7 @@
   </div>
 </template>
 <script>
-import { commandStack, cli, bpmnModeler } from '../bpmn'
+import { commandStack, cli, importXML, exportXML } from '../bpmn'
 
 export default {
   data() {
@@ -84,15 +84,14 @@ export default {
     run() {},
     // Saving DEMO
     save() {
-      bpmnModeler.saveXML({ format: true }, (err, xml) => {
-        if (err) {
-          console.log(err)
-        } else {
-          // console.log(xml)
+      exportXML()
+        .then(xml => {
           this.drawerVisible = true
           this.drawerContent = xml
-        }
-      })
+        })
+        .catch(_ => {
+          this.$message.error('Failed!导出失败')
+        })
     },
     copy() {
       navigator.clipboard.writeText(this.drawerContent).then(
@@ -114,13 +113,10 @@ export default {
       if (result === null) {
         return
       }
-      bpmnModeler.importXML(result, err => {
-        if (err) {
-          console.error(err)
-          this.$message.error(
-            'Loading Error Please Check XML. 读取失败请检查 XML 格式!'
-          )
-        }
+      importXML(result).catch(_ => {
+        this.$message.error(
+          'Loading Error Please Check XML. 读取失败请检查 XML 格式!'
+        )
       })
     },
     undo() {

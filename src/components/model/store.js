@@ -13,6 +13,7 @@ const store = new Vuex.Store({
   state: {
     currentNodeId: null,
     isRunning: false,
+    zoomLevel: undefined,
     inputModel: {},
     outputModel: {},
     transferModel: {},
@@ -28,6 +29,9 @@ const store = new Vuex.Store({
     },
     startProject:(state) => {
       state.isRunning = true
+    },
+    setZoomLevel(state, level){
+      state.zoomLevel = parseFloat(level)
     },
     setInput:(state, payload) => {
       // state.inputModel[payload.id] = payload.obj
@@ -86,10 +90,6 @@ const store = new Vuex.Store({
         }
       }
     }
-  },
-  actions: {
-    // TODO: general load XML here
-    // loadXML({ commit, state }, xml) {},
   },
   strict: process.env.NODE_ENV !== 'production',
 })

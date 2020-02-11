@@ -14,8 +14,6 @@ export default {
   labelEditingPreview: ['value', ''],
   // disable left palette 禁用
   paletteProvider: ['value', ''],
-  // disable scroll zoom 滚轮禁用
-  zoomScroll: ['value', ''],
   // disable multiple connections between two nodes 多次连接禁用，连接线规则修改
   bpmnRules: ['type', BpmnRules],
   // custom BpmnRenderer for node styles 自定义元素样式
