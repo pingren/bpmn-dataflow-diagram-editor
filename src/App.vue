@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <el-container>
-      <PaneLeft />
-      <PaneTop />
-      <PaneRight />
+      <PanelLeft />
+      <PanelTop />
+      <PanelRight />
       <ZoomSlider style="position:absolute; bottom:100px;left: 300px;" />
       <DiagramEditor style="height:calc(100vh - 25px);width:100%;" />
     </el-container>
@@ -11,9 +11,9 @@
 </template>
 
 <script>
-import PaneLeft from './components/panel-left'
-import PaneRight from './components/panel-right'
-import PaneTop from './components/panel-top'
+import PanelLeft from './components/PanelLeft'
+import PanelRight from './components/PanelRight'
+import PanelTop from './components/PanelTop'
 import ZoomSlider from './components/ZoomSlider'
 import DiagramEditor from './components/DiagramEditor.vue'
 
@@ -22,9 +22,9 @@ export default {
   components: {
     DiagramEditor,
     ZoomSlider,
-    PaneLeft,
-    PaneRight,
-    PaneTop,
+    PanelLeft,
+    PanelRight,
+    PanelTop,
   },
 }
 </script>

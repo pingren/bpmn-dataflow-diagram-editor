@@ -22,7 +22,7 @@
           <span slot="title">Datasource List
           </span>
         </template>
-        <DatabasePicker
+        <PickerDatabase
           class="submenu"
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(30vh - 51px);'"
         />
@@ -33,7 +33,7 @@
           <span slot="title">Operators Tree
           </span>
         </template>
-        <OperatorPicker
+        <PickerOperator
           class="submenu"
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(70vh - 35px);'"
         />
@@ -43,13 +43,13 @@
 </template>
 
 <script>
-import OperatorPicker from './OperatorPicker'
-import DatabasePicker from './DatabasePicker'
+import PickerOperator from './PickerOperator'
+import PickerDatabase from './PickerDatabase'
 
 export default {
   components: {
-    OperatorPicker,
-    DatabasePicker,
+    PickerOperator,
+    PickerDatabase,
   },
   data() {
     return {

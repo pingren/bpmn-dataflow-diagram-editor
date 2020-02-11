@@ -62,7 +62,7 @@
   </div>
 </template>
 <script>
-import { commandStack, cli, importXML, exportXML } from '../bpmn'
+import { commandStack, cli, importXML, exportXML } from '../../bpmn'
 
 export default {
   data() {

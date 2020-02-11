@@ -6,7 +6,7 @@ import CliModule from 'bpmn-js-cli'
 import CustomModule from './module'
 
 import store from './model/store'
-import { operatorList } from '../mock'
+import { operatorList } from './mock'
 const ignoreList = [
   'bpmn:Process',
   'bpmn:SequenceFlow',

@@ -47,7 +47,7 @@
 <script>
 import { mapState } from 'vuex'
 import { operatorList } from '../../mock.js'
-import { getNodeById } from '../bpmn'
+import { getNodeById } from '../../bpmn'
 export default {
   props: {
     value: {

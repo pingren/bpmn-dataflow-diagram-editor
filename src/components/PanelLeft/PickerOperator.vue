@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { setDraggingNode } from '../bpmn'
+import { setDraggingNode } from '../../bpmn'
 export default {
   data() {
     return {

@@ -4,7 +4,7 @@ import locale from 'element-ui/lib/locale/lang/zh-CN'
 import App from './App.vue'
 // import 'element-ui/lib/theme-chalk/index.css'
 import './element-variables.scss'
-import store from './components/model/store.js'
+import store from './model/store.js'
 
 Vue.use(ElementUI, {
   locale,

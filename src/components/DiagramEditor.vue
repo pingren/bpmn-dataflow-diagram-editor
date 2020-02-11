@@ -16,7 +16,7 @@ import {
   setDraggingNode,
   createNode,
   importXML,
-} from './bpmn'
+} from '../bpmn'
 
 export default {
   data() {

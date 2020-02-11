@@ -12,7 +12,7 @@
   />
 </template>
 <script>
-import { canvas } from './bpmn'
+import { canvas } from '../bpmn'
 
 export default {
   computed: {
@@ -28,7 +28,6 @@ export default {
   methods: {
     slide(val) {
       canvas.zoom(val)
-      console.log('zoomed')
     },
   },
 }
