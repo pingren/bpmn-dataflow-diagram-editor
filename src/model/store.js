@@ -1,99 +1,42 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import reusableModule from './module'
 // import { getNodeById, eventBus } from '../bpmn'
 Vue.use(Vuex)
 
-function obj2JSON(obj) {
-  // 如果是数值则转换成字符串类型，使 JSON.stringify 格式统一不调用多次 watch, element-ui number picker 会采用数值
-  return JSON.stringify(obj, (_, value) =>
-    isNaN(value) ? value : String(value)
-  )
-}
+// vue root store keep track of project key, registerModule if needed, mutations are shortcut to children store.
 const store = new Vuex.Store({
   state: {
-    currentNodeId: null,
-    isRunning: false,
-    zoomLevel: undefined,
-    inputModel: {},
-    outputModel: {},
-    transferModel: {},
-  },
-  getters: {
-    currentNode: state => {
-      // TODO: need fix logic for Diagram.js
-      // return getNodeById(state.currentNodeId)
-    },
+    key: null,
   },
   mutations: {
-    selectNode:(state, node) => {
-      state.currentNodeId = node.id
+    setCurrentKey:(state, key) => {
+      key = String(key)
+      state.key = key
+      if(state[key] === undefined) {
+        store.registerModule(key, reusableModule)
+      }
+    },
+    selectNode:(state, payload) => {
+      store.commit(`${state.key}/selectNode`, payload)
     },
     startProject:(state) => {
-      state.isRunning = true
+      store.commit(`${state.key}/startProject`)
     },
-    setZoomLevel(state, level){
-      state.zoomLevel = parseFloat(level)
+    setZoomLevel:(state, payload) => {
+      store.commit(`${state.key}/setZoomLevel`, payload)
     },
     setInput:(state, payload) => {
-      // state.inputModel[payload.id] = payload.obj
-      Vue.set(state.inputModel, payload.id, payload.obj)
+      store.commit(`${state.key}/setInput`, payload)
     },
     setOutput:(state, payload) => {
-      // state.outputModel[payload.id] = payload.obj
-      Vue.set(state.outputModel, payload.id, payload.obj)
+      store.commit(`${state.key}/setOutput`, payload)
     },
     setTransfer:(state, payload) => {
-      // state.transferModel[payload.id] = payload.obj
-      let oldTransferJSON = obj2JSON(state.transferModel[payload.id])
-      if(payload.key) {
-        // set specific value for tranferModel[paylod.id], comply vuex strict mode
-        Vue.set(state.transferModel[payload.id], payload.key, payload.obj)
-      }
-      else {
-        Vue.set(state.transferModel, payload.id, payload.obj)
-      }
-      let newTransferJSON = obj2JSON(state.transferModel[payload.id])
-      if(oldTransferJSON !== newTransferJSON) {
-        console.log(
-          `Modify Node ${payload.id} Data :`,
-          oldTransferJSON,
-          '=>',
-          newTransferJSON
-        )
-        // TODO: need fix class object logic for Diagram.js
-
-        /*
-        // let node = getNodeById(payload.id)
-        node.set('PROPERTY', newTransferJSON)
-        // if not init loading, BFS to update all child nodes
-        if(!payload.init) {
-          eventBus.fire('commandStack.changed', {
-            businessObject: node,
-          })
-        }
-        */
-      }
+      store.commit(`${state.key}/setTransfer`, payload)
     },
     updateTransfer:(state, payload) => {
-      // loop input model object, modify transferModel if necessary，
-      let input = state.inputModel[payload.id]
-      let transfer = state.transferModel[payload.id]
-      for (const [key, inputArray] of Object.entries(input)) {
-        let transferValue = transfer[key]
-        // TODO: maybe double check transfer area is from the input, before check the key
-        if(transferValue === "" || transferValue === undefined) {
-          continue
-        }
-        if(transferValue.length !== undefined){
-            let newTransfer = transferValue.filter(value => inputArray.find(item => JSON.stringify(item) === JSON.stringify(value)))
-            Vue.set(state.transferModel[payload.id], key, newTransfer)
-        }
-        else {
-          if(inputArray.find(item => JSON.stringify(item) === JSON.stringify(transferValue)) === undefined){
-            Vue.set(state.transferModel[payload.id], key, undefined)
-          }
-        }
-      }
+      store.commit(`${state.key}/updateTransfer`, payload)
     }
   },
   strict: process.env.NODE_ENV !== 'production',

@@ -6,7 +6,7 @@
     <ZoomSlider style="position:absolute; bottom:100px;left: 300px;" />
     <div
       ref="content"
-      style="height:calc(100vh - 25px);width:100%;"
+      style="height:calc(100vh - 72px);width:100%;"
       class="containers"
       @dragover.stop="dragover_handler"
       @drop.stop="drop_handler"
@@ -32,16 +32,24 @@ export default {
   provide() {
     return {
       diagram: this.getDiagram,
+      key: this.key,
     }
   },
   data() {
     return {
+      key: Date.now(),
       diagram: undefined,
     }
   },
+  created() {
+    this.$store.commit('setCurrentKey', this.key)
+  },
   mounted() {
-    this.diagram = new Diagram(this.$refs.content)
+    this.diagram = new Diagram(this.$refs.content, this.key)
     this.diagram.importXML(diagramXML)
+  },
+  activated() {
+    this.$store.commit('setCurrentKey', this.key)
   },
   methods: {
     getDiagram() {

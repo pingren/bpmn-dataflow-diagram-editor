@@ -45,10 +45,9 @@
   </el-form>
 </template>
 <script>
-import { mapState } from 'vuex'
 import { operatorList } from '../../mock.js'
 export default {
-  inject: ['diagram'],
+  inject: ['diagram', 'key'],
   props: {
     value: {
       type: Object,
@@ -61,7 +60,18 @@ export default {
     }
   },
   computed: {
-    ...mapState(['currentNodeId', 'inputModel', 'transferModel']),
+    state() {
+      return this.$store.state[this.key]
+    },
+    currentNodeId() {
+      return this.state.currentNodeId
+    },
+    inputModel() {
+      return this.state.inputModel
+    },
+    transferModel() {
+      return this.state.transferModel
+    },
     currentNode() {
       return this.diagram().getNodeById(this.id)
     },
@@ -73,7 +83,12 @@ export default {
         return this.transferModel[this.id]
       },
       set(value) {
-        this.$store.commit('setTransfer', { id: this.id, obj: value })
+        // TODO: fix passing diagram
+        this.$store.commit('setTransfer', {
+          id: this.id,
+          obj: value,
+          diagram: this.diagram(),
+        })
       },
     },
     props() {
@@ -99,8 +114,14 @@ export default {
     // console.log(this.currentNode.name)
   },
   methods: {
+    // TODO: fix passing diagram
     updateTransferModel(key, value) {
-      this.$store.commit('setTransfer', { id: this.id, key, obj: value })
+      this.$store.commit('setTransfer', {
+        id: this.id,
+        key,
+        obj: value,
+        diagram: this.diagram(),
+      })
     },
   },
 }

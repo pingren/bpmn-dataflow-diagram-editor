@@ -14,7 +14,7 @@
         :name="item.name"
       >
         <keep-alive>
-          <DiagramEditor />
+          <DiagramEditor v-if="item.name === tabName" />
         </keep-alive>
       </el-tab-pane>
     </el-tabs>

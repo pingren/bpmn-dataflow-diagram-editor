@@ -30,7 +30,7 @@
         </div>
       </el-submenu>
       <el-submenu
-        v-if="currentNode"
+        v-if="currentNodeId"
         index="2"
       >
         <template slot="title">
@@ -45,7 +45,7 @@
           "
         >
           <keep-alive>
-            <PaneProperty :key="currentNode.id" />
+            <PaneProperty :key="currentNodeId" />
           </keep-alive>
         </el-menu-item-group>
       </el-submenu>
@@ -91,8 +91,8 @@
 <script>
 import PaneProperty from './PaneProperty'
 import PaneInfo from './PaneInfo'
-import { mapGetters } from 'vuex'
 export default {
+  inject: ['key'],
   components: {
     PaneProperty,
     PaneInfo,
@@ -110,7 +110,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['currentNode']),
+    state() {
+      return this.$store.state[this.key]
+    },
+    currentNodeId() {
+      return this.state.currentNodeId
+    },
   },
   watch: {
     activities() {

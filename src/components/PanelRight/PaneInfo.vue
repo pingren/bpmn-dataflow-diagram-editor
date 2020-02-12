@@ -4,12 +4,18 @@
   </p>
 </template>
 <script>
-import { mapGetters } from 'vuex'
-
 import { operatorList } from '../../mock.js'
 export default {
+  inject: ['diagram', 'key'],
   computed: {
-    ...mapGetters(['currentNode']),
+    currentNodeId() {
+      return this.$store.state[this.key].currentNodeId
+    },
+    currentNode() {
+      return this.currentNodeId
+        ? this.diagram().getNodeById(this.currentNodeId)
+        : undefined
+    },
     description() {
       if (this.currentNode && this.currentNode.$attrs.ID) {
         let config = operatorList.find(

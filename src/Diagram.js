@@ -9,7 +9,6 @@ import store from './model/store'
 import { operatorList } from './mock'
 
 // TODO: add diagram debug helper
-
 const ignoreList = [
   'bpmn:Process',
   'bpmn:SequenceFlow',
@@ -21,99 +20,11 @@ const processName = 'Process_1'
 const StartEventName = 'StartEvent_1'
 // const EndEventName = 'EndEvent_1'
 
-// evaluateNodeInput from parents' nodeOutput according to config.input & then updateTransfer
-function evaluateNodeInput(node) {
 
-  let operatorId = getAttrs(node).ID
-  let config = operatorList.find(
-    item => String(item.id) === String(operatorId)
-  )
-  if(config.input) {
-    let parentNodes = getParentNodes(node)
-    // console.log('parentNodes:', parentNodes)
-    let parentOutputs = parentNodes.map(node => store.state.outputModel[node.id]).filter(item => item !== {} && item !== undefined)
-    // console.log('parentOuputs:', parentOutputs)
-    // config.input is an array of object, pick sepcific key arrays as nodeInput, and flatmap if needed
-    // Example: input:[{key: ['c7-1','c7-2'], target: 'c7',mode: 'flatMap'}] means pick 'c7-1','c7-2', flatten result into c7
-    // flatMap
-    let resultObject = config.input.reduce((result, inputEntry) => {
-      let currentObj
-      if(inputEntry.key && inputEntry.target) {
-        let keys = inputEntry.key
-        if(typeof keys === 'string'){
-          keys = [keys]
-        }
-        currentObj = parentOutputs.flatMap(output => keys.flatMap(key => output[key] ? output[key] : []))
-        return Object.assign(result, {[inputEntry.target] : currentObj})
-      }
-    }, {})
-    // if input Change commit to the vuex
-    if(resultObject && diff(resultObject, store.state.inputModel[node.id])) {
-      // console.log('nodeInput', resultObject)
-      store.commit('setInput', {id: node.id, obj: resultObject})
-      store.commit('updateTransfer', {id: node.id})
-    }
-  }
-}
-// evaluateNodeOuput from nodeTransfer according to config.output
-function evaluateNodeOutput(node){
-
-  let operatorId = getAttrs(node).ID
-  let property = store.state.transferModel[node.id]
-
-  let config = operatorList.find(
-    item => String(item.id) === String(operatorId)
-  )
-  if(config.output) {
-    // config.output is an array of object, pick specific keys to nodeOutput, and maybe do a rename
-    // Example: [{key:'option3',rename:'c7' }] means pick 'option3', and rename it to c7.
-    // reduce
-    //  note this will override entry with same keys, so keep diffrent output keys by using rename
-    let resultObject = config.output.reduce((result, outputEntry) => {
-      let currentObj
-      if(outputEntry.key && property[outputEntry.key]) {
-        let outKey = outputEntry.rename ? outputEntry.rename : outputEntry.key
-        currentObj = {[outKey]: property[outputEntry.key]}
-      }
-      return Object.assign(result, currentObj)
-    }, {})
-
-    // if output Change commit to the vuex
-    if(resultObject && diff(resultObject, store.state.outputModel[node.id])) {
-      // console.log('nodeOutput', resultObject)
-      store.commit('setOutput', {id: node.id, obj: resultObject})
-    }
-  }
-}
-// Promise helper for bfs
-Promise.each = async function(arr, fn) { // take an array and a function
-  for(const item of arr) await fn(item);
-}
-// bfs eval nodes asynchronously
-function evaluateNodeData(nodesToVisit, type = ''){
-  // TODO: use DFS check if there is a loop in the diagram before continue
-  if(nodesToVisit.length === undefined && nodesToVisit.id) {
-    nodesToVisit = [nodesToVisit]
-  }
-  let nodesBatch = nodesToVisit;
-  nodesToVisit = [];
-  Promise.each(nodesBatch, node => {
-      console.log(node.id, node.name, type);
-      if (ignoreList.indexOf(node.$type) === -1) {
-        evaluateNodeInput(node.id)
-        evaluateNodeOutput(node.id)
-      }
-      let childNodes = getChildNodes(node)
-      nodesToVisit = nodesToVisit.concat(childNodes)
-  }).then(function() {
-    if(nodesToVisit.length > 0) {
-      evaluateNodeData(nodesToVisit, "bfs")
-    }
-  })
-}
 export default class Diagram {
 
-  constructor(container) {
+  constructor(container, key = Date.now()) {
+    this.key = key
     this.bpmnModeler = new BpmnModeler({
       container: container,
       // load custom module
@@ -145,7 +56,7 @@ export default class Diagram {
         if (ignoreList.indexOf(el.type) === -1) {
           // make sure not mutiple elements selected
           let els = this.selection.get()
-          if(store.state.currentNodeId !== el.businessObject.id && els.length === 1) {
+          if(store.state[this.key].currentNodeId !== el.businessObject.id && els.length === 1) {
             store.commit('selectNode', el.businessObject)
           }
           return true
@@ -168,7 +79,7 @@ export default class Diagram {
         } else if(this.addFlag === true && event.type === 'connection.changed') {
           // addFlag is an ugly fix since targetRef will be undefined at first place
           // call evaluateNodeData when new connection created,
-          evaluateNodeData(event.element.businessObject.targetRef, 'newConnectionToNode')
+          this.evaluateNodeData(event.element.businessObject.targetRef, 'newConnectionToNode')
           this.addFlag = false
         }
         if(event.type === 'connection.remove') {
@@ -179,12 +90,12 @@ export default class Diagram {
       this.eventBus.on('commandStack.changed', 0 , event =>{
         if(event.businessObject){
           // let childNodes = getChildNodes(event.businessObject)
-          evaluateNodeData(event.businessObject, 'nodeAttrsChanged')
+          this.evaluateNodeData(event.businessObject, 'nodeAttrsChanged')
         }
         if(this.removeTargetNode){
           // removeTargetNode is an ugly fix similar to addFlag
           // call evaluateNodeData when a connection removed
-          evaluateNodeData(this.removeTargetNode, 'connectionRemoved')
+          this.evaluateNodeData(this.removeTargetNode, 'connectionRemoved')
           this.removeTargetNode = undefined
         }
       })
@@ -212,7 +123,7 @@ export default class Diagram {
         store.commit('setTransfer', { id: node.id, obj: getProperty(node), init: true })
       }
       if(nodes.length > 0) {
-        evaluateNodeData(this.cli.element(StartEventName).businessObject)
+        this.evaluateNodeData(this.cli.element(StartEventName).businessObject)
       }
     }
     // import done, register eventBus event
@@ -310,8 +221,97 @@ export default class Diagram {
   setDraggingNode(node) {
     this.draggingNode = node
   }
-}
+  // evaluateNodeInput from parents' nodeOutput according to config.input & then updateTransfer
+  evaluateNodeInput(node) {
 
+  let operatorId = getAttrs(node).ID
+  let config = operatorList.find(
+    item => String(item.id) === String(operatorId)
+  )
+  if(config.input) {
+    let parentNodes = getParentNodes(node)
+    // console.log('parentNodes:', parentNodes)
+    let parentOutputs = parentNodes.map(node => store.state[this.key].outputModel[node.id]).filter(item => item !== {} && item !== undefined)
+    // console.log('parentOuputs:', parentOutputs)
+    // config.input is an array of object, pick sepcific key arrays as nodeInput, and flatmap if needed
+    // Example: input:[{key: ['c7-1','c7-2'], target: 'c7',mode: 'flatMap'}] means pick 'c7-1','c7-2', flatten result into c7
+    // flatMap
+    let resultObject = config.input.reduce((result, inputEntry) => {
+      let currentObj
+      if(inputEntry.key && inputEntry.target) {
+        let keys = inputEntry.key
+        if(typeof keys === 'string'){
+          keys = [keys]
+        }
+        currentObj = parentOutputs.flatMap(output => keys.flatMap(key => output[key] ? output[key] : []))
+        return Object.assign(result, {[inputEntry.target] : currentObj})
+      }
+    }, {})
+    // if input Change commit to the vuex
+    if(resultObject && diff(resultObject, store.state[this.key].inputModel[node.id])) {
+      // console.log('nodeInput', resultObject)
+      store.commit('setInput', {id: node.id, obj: resultObject})
+      store.commit('updateTransfer', {id: node.id})
+    }
+  }
+}
+  // evaluateNodeOuput from nodeTransfer according to config.output
+  evaluateNodeOutput(node){
+
+    let operatorId = getAttrs(node).ID
+    let property = store.state[this.key].transferModel[node.id]
+
+    let config = operatorList.find(
+      item => String(item.id) === String(operatorId)
+    )
+    if(config.output) {
+      // config.output is an array of object, pick specific keys to nodeOutput, and maybe do a rename
+      // Example: [{key:'option3',rename:'c7' }] means pick 'option3', and rename it to c7.
+      // reduce
+      //  note this will override entry with same keys, so keep diffrent output keys by using rename
+      let resultObject = config.output.reduce((result, outputEntry) => {
+        let currentObj
+        if(outputEntry.key && property[outputEntry.key]) {
+          let outKey = outputEntry.rename ? outputEntry.rename : outputEntry.key
+          currentObj = {[outKey]: property[outputEntry.key]}
+        }
+        return Object.assign(result, currentObj)
+      }, {})
+
+      // if output Change commit to the vuex
+      if(resultObject && diff(resultObject, store.state[this.key].outputModel[node.id])) {
+        // console.log('nodeOutput', resultObject)
+        store.commit('setOutput', {id: node.id, obj: resultObject})
+      }
+    }
+  }
+  // bfs eval nodes asynchronously
+  evaluateNodeData(nodesToVisit, type = ''){
+    // TODO: use DFS check if there is a loop in the diagram before continue
+    if(nodesToVisit.length === undefined && nodesToVisit.id) {
+      nodesToVisit = [nodesToVisit]
+    }
+    let nodesBatch = nodesToVisit;
+    nodesToVisit = [];
+    Promise.each(nodesBatch, node => {
+        console.log(node.id, node.name, type);
+        if (ignoreList.indexOf(node.$type) === -1) {
+          this.evaluateNodeInput(node)
+          this.evaluateNodeOutput(node)
+        }
+        let childNodes = getChildNodes(node)
+        nodesToVisit = nodesToVisit.concat(childNodes)
+    }).then(() => {
+      if(nodesToVisit.length > 0) {
+        this.evaluateNodeData(nodesToVisit, "bfs")
+      }
+    })
+  }
+}
+// Promise helper for bfs
+Promise.each = async function(arr, fn) { // take an array and a function
+  for(const item of arr) await fn(item);
+}
 function diff(obj1, obj2) {
   return JSON.stringify(obj1) !== JSON.stringify(obj2)
 }
