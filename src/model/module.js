@@ -56,7 +56,7 @@ let reusableModule = {
           '=>',
           newTransferJSON
         )
-        // TODO: need fix logic for Diagram.js, loaded xml will cause diagram undefined
+        // Transfer update will update diagram XML, payload.diagram must be provided
         let node = payload.diagram.getNodeById(payload.id)
         node.set('PROPERTY', newTransferJSON)
         // if not init loading, BFS to update all child nodes

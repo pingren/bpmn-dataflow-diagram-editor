@@ -20,7 +20,6 @@ export default {
   },
   methods: {
     slide(val) {
-      console.log('slide:', this.key, val)
       this.$store.commit('setZoomLevel', val)
       this.diagram().canvas.zoom(val)
     },

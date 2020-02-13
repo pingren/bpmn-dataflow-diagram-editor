@@ -83,7 +83,6 @@ export default {
         return this.transferModel[this.id]
       },
       set(value) {
-        // TODO: fix passing diagram
         this.$store.commit('setTransfer', {
           id: this.id,
           obj: value,
@@ -114,7 +113,6 @@ export default {
     // console.log(this.currentNode.name)
   },
   methods: {
-    // TODO: fix passing diagram
     updateTransferModel(key, value) {
       this.$store.commit('setTransfer', {
         id: this.id,

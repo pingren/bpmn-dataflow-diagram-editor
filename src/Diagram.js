@@ -120,7 +120,7 @@ export default class Diagram {
         }
       }
       for(let node of nodes) {
-        store.commit('setTransfer', { id: node.id, obj: getProperty(node), init: true })
+        store.commit('setTransfer', { id: node.id, obj: getProperty(node), init: true, diagram: this })
       }
       if(nodes.length > 0) {
         this.evaluateNodeData(this.cli.element(StartEventName).businessObject)
@@ -294,7 +294,7 @@ export default class Diagram {
     let nodesBatch = nodesToVisit;
     nodesToVisit = [];
     Promise.each(nodesBatch, node => {
-        console.log(node.id, node.name, type);
+        // console.log(node.id, node.name, type);
         if (ignoreList.indexOf(node.$type) === -1) {
           this.evaluateNodeInput(node)
           this.evaluateNodeOutput(node)
