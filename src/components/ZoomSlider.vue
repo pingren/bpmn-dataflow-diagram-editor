@@ -1,7 +1,8 @@
 <template>
   <el-slider
+    v-if="zoomLevel"
+    v-model="innerValue"
     class="slider"
-    :value="zoomLevel"
     :step="0.001"
     :min="0.2"
     :max="4"
@@ -14,14 +15,23 @@
 <script>
 export default {
   inject: ['diagram', 'key'],
+  data: function() {
+    return {
+      innerValue: undefined,
+    }
+  },
   computed: {
     zoomLevel() {
       return this.$store.state[this.key].zoomLevel
     },
   },
+  watch: {
+    zoomLevel() {
+      this.innerValue = this.zoomLevel
+    },
+  },
   methods: {
     slide(val) {
-      this.$store.commit('setZoomLevel', val)
       this.diagram().canvas.zoom(val)
     },
   },

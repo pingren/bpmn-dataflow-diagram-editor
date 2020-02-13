@@ -28,7 +28,7 @@ export default {
     PanelRight,
     PanelTop,
   },
-  // provide for child components inject the diagram object
+  // provide for child components inject the diagram object & vuex child module key
   provide() {
     return {
       diagram: this.getDiagram,
@@ -37,18 +37,24 @@ export default {
   },
   data() {
     return {
-      key: Date.now(),
+      key: String(Date.now()),
       diagram: undefined,
     }
   },
+  beforeDestroy() {
+    this.$store.commit('removeKey', this.key)
+  },
   created() {
+    this.$store.commit('createKey', this.key)
     this.$store.commit('setCurrentKey', this.key)
   },
   mounted() {
     this.diagram = new Diagram(this.$refs.content, this.key)
     this.diagram.importXML(diagramXML)
   },
+  // Tabs Switch
   activated() {
+    // this is called after all children mounted, if root mutation called first, setCurrentKey is too late and will casue bugs
     this.$store.commit('setCurrentKey', this.key)
   },
   methods: {
@@ -73,11 +79,7 @@ export default {
   },
 }
 </script>
-<style lang="css">
-.devdrawer {
-  height: 100%;
-  overflow: auto !important;
-}
+<style lang="scss" scoped>
 /* Styles Required */
 @import '~bpmn-js/dist/assets/diagram-js.css';
 /* @import '~bpmn-js/dist/assets/bpmn-font/css/bpmn.css'; */

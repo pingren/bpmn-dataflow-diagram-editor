@@ -10,12 +10,21 @@ const store = new Vuex.Store({
     key: null,
   },
   mutations: {
-    setCurrentKey:(state, key) => {
-      key = String(key)
-      state.key = key
+    createKey:(state, key) => {
       if(state[key] === undefined) {
         store.registerModule(key, reusableModule)
       }
+      else {
+        throw new Error(`module ${key} arelady exist `)
+      }
+    },
+    removeKey:(state, key) => {
+      if(state[key]){
+        store.unregisterModule(key)
+      }
+    },
+    setCurrentKey:(state, key) => {
+      state.key = key
     },
     selectNode:(state, payload) => {
       store.commit(`${state.key}/selectNode`, payload)
