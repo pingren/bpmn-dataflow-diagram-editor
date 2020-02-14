@@ -7,8 +7,8 @@ import CustomModule from './module'
 
 import store from './model/store'
 import { operatorList } from './mock'
+import { MessageBox } from 'element-ui';
 
-// TODO: add diagram debug helper
 const ignoreList = [
   'bpmn:Process',
   'bpmn:SequenceFlow',
@@ -51,6 +51,10 @@ export default class Diagram {
     this.cli = window.cli
     this.nodesToEvaluate = new Set()
     const registerEvents = () => {
+      // nodes create events
+      this.eventBus.on('commandStack.shape.create.postExecute', 0, event => {
+        this.addDebugOverlayToNode(event.context.shape.businessObject)
+      })
       // click event: fire vuex mutation 'selectNode' with clicked node id
       this.eventBus.on('element.click', 0, event => {
         let el = event.element
@@ -102,19 +106,10 @@ export default class Diagram {
         let ele = this.cli.element(id).businessObject
         return ignoreList.indexOf(ele.$type) === -1 ? ele : []
       })
-      function getProperty(node) {
-        try {
-          let attrs = getAttrs(node)
-          if(attrs){
-            return JSON.parse(attrs.PROPERTY)
-          }
-        } catch (error) {
-          throw error
-        }
-      }
       // setTransfer for all nodes from xml
       for(let node of nodes) {
         store.commit('setTransfer', { id: node.id, obj: getProperty(node), init: true, diagram: this })
+        this.addDebugOverlayToNode(node)
       }
       // BFS from StartEvent Node to get vuex model
       if(nodes.length > 0) {
@@ -304,6 +299,35 @@ export default class Diagram {
       }
     })
   }
+  addDebugOverlayToNode(node){
+    let div = document.createElement("button");
+    let text = document.createTextNode(`${node.id}`);
+    div.appendChild(text);
+    div.onclick = () => {
+      const nodeHTML = `<pre>NODE: ${JSON.stringify(node, null, 2)}</pre>`
+      const nodeAttrsHTML = `<pre>ATTRS: ${JSON.stringify(getAttrs(node), null, 2)}</pre>`
+      const nodePropertyHTML = `<pre>PROPERTY: ${JSON.stringify(getProperty(node), null, 2)}</pre>`
+      MessageBox(
+        {
+          message:`<style type="text/css">
+                  .DebugMessageBox {
+                    width: 70vw;
+                  }
+                  </style>
+          <div style="overflow:auto;max-height: 90vh;">${nodeHTML + nodeAttrsHTML + nodePropertyHTML}<div>`,
+          title: 'Node Debug Viewer',
+          dangerouslyUseHTMLString: true,
+          customClass:"DebugMessageBox",
+        }
+      )
+    };
+    this.overlays.add(node.id, {
+      position: {
+        bottom: 0,
+      },
+      html: div
+    });
+  }
 }
 // Promise helper for bfs
 Promise.each = async function(arr, fn) { // take an array and a function
@@ -338,6 +362,16 @@ function setTargetNodes(node, ...nodes) {
 function getAttrs(businessObject) {
   try {
     return businessObject.$attrs
+  } catch (error) {
+    throw error
+  }
+}
+function getProperty(node) {
+  try {
+    let attrs = getAttrs(node)
+    if(attrs){
+      return JSON.parse(attrs.PROPERTY)
+    }
   } catch (error) {
     throw error
   }
