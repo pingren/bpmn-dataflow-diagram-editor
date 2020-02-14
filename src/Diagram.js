@@ -51,7 +51,13 @@ export default class Diagram {
     this.cli = window.cli
     this.nodesToEvaluate = new Set()
     const registerEvents = () => {
-      // nodes create events
+      // disable mousedown when diagram is running, so element is not draggable
+      // this.eventBus.on('element.mousedown', 10000, (event) => {
+      //   if (true && event.element.id !== processName) {
+      //     return false
+      //   }
+      // })
+      // nodes create event
       this.eventBus.on('commandStack.shape.create.postExecute', 0, event => {
         this.addDebugOverlayToNode(event.context.shape.businessObject)
       })
@@ -72,8 +78,8 @@ export default class Diagram {
         }
       })
       // connection events: fire evaluateNodeData when connection logic changed
-      this.eventBus.on(['connection.added', 'connection.removed'], 0, (event) => {
-        if(event.type === 'connection.added'){
+      this.eventBus.on(['connection.add', 'connection.removed'], 0, (event) => {
+        if(event.type === 'connection.add'){
           let node = event.element.target.businessObject
           this.evaluateNodeData(node, 'newConnectionToNode')
           // connection event: fire vuex mutation 'selectNode' with target node, this should be disabled when importing graph
@@ -98,7 +104,7 @@ export default class Diagram {
       })
     }
     const unregisterEvents = () => {
-      this.eventBus.off(['connection.added'])
+      this.eventBus.off(['connection.add'])
     }
     // init vuex model for loaded graph through cli
     const initModel = () => {
