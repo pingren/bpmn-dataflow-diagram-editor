@@ -49,6 +49,7 @@ export default class Diagram {
     // eslint-disable-next-line
     this.zoomScroll.__proto__.scroll = () => {}
     this.cli = window.cli
+    this.nodesToEvaluate = new Set()
     const registerEvents = () => {
       // click event: fire vuex mutation 'selectNode' with clicked node id
       this.eventBus.on('element.click', 0, event => {
@@ -66,42 +67,34 @@ export default class Diagram {
           return false
         }
       })
-      // connection event: fire vuex mutation 'selectNode' with target node id
-      this.eventBus.on('connection.add', 0, (event) => {
-        let el = event.element.target
-        store.commit('selectNode', el.businessObject)
-      })
       // connection events: fire evaluateNodeData when connection logic changed
-      this.eventBus.on(['connection.added','connection.remove','connection.changed'], 1000, (event) => {
+      this.eventBus.on(['connection.added', 'connection.removed'], 0, (event) => {
         if(event.type === 'connection.added'){
-          this.addFlag = true
-
-        } else if(this.addFlag === true && event.type === 'connection.changed') {
-          // addFlag is an ugly fix since targetRef will be undefined at first place
-          // call evaluateNodeData when new connection created,
-          this.evaluateNodeData(event.element.businessObject.targetRef, 'newConnectionToNode')
-          this.addFlag = false
+          let node = event.element.target.businessObject
+          this.evaluateNodeData(node, 'newConnectionToNode')
+          // connection event: fire vuex mutation 'selectNode' with target node, this should be disabled when importing graph
+          store.commit('selectNode', node)
         }
-        if(event.type === 'connection.remove') {
-          this.removeTargetNode = event.element.businessObject.targetRef
+        if(event.type === 'connection.removed') {
+          // add all connections target to nodesToEvaluate set to prevent duplicated nodes
+          this.nodesToEvaluate.add(event.element.target.businessObject)
         }
       })
-      // commandStack event will fire when node attrs change and
+      // commandStack event will fire when node attrs change and connections removed
       this.eventBus.on('commandStack.changed', 0 , event =>{
-        if(event.businessObject){
-          // let childNodes = getChildNodes(event.businessObject)
-          this.evaluateNodeData(event.businessObject, 'nodeAttrsChanged')
+        if(event.node){
+          this.evaluateNodeData(event.node, 'nodeAttrsChangedByUser')
         }
-        if(this.removeTargetNode){
-          // removeTargetNode is an ugly fix similar to addFlag
-          // call evaluateNodeData when a connection removed
-          this.evaluateNodeData(this.removeTargetNode, 'connectionRemoved')
-          this.removeTargetNode = undefined
+        else {
+          for(let node of this.nodesToEvaluate) {
+            this.evaluateNodeData(node, 'connectionRemovedByUser')
+          }
+          this.nodesToEvaluate = new Set()
         }
       })
     }
     const unregisterEvents = () => {
-      this.eventBus.off(['connection.add'])
+      this.eventBus.off(['connection.added'])
     }
     // init vuex model for loaded graph through cli
     const initModel = () => {
@@ -119,11 +112,13 @@ export default class Diagram {
           throw error
         }
       }
+      // setTransfer for all nodes from xml
       for(let node of nodes) {
         store.commit('setTransfer', { id: node.id, obj: getProperty(node), init: true, diagram: this })
       }
+      // BFS from StartEvent Node to get vuex model
       if(nodes.length > 0) {
-        this.evaluateNodeData(this.cli.element(StartEventName).businessObject)
+        this.evaluateNodeData(this.cli.element(StartEventName).businessObject, 'Init BFS')
       }
     }
     // import done, register eventBus event
@@ -140,7 +135,7 @@ export default class Diagram {
       registerEvents()
     })
     // disable eventBus if import mutiple times
-    this.eventBus.on('import.render.start', 0, () => unregisterEvents)
+    this.eventBus.on('import.render.start', 0, unregisterEvents)
   }
   importXML(xml){
     return new Promise(
@@ -204,8 +199,6 @@ export default class Diagram {
     }
     let el = this.cli.element(id)
     el.businessObject.name = node.data.label
-    // el.businessObject = Object.assign(el.businessObject, node.data)
-    // delete el.businessObject.label
     el.businessObject.set('ID', node.data.ID)
     // Beautify element
     // width & height should reflect on both VIEW & XML
@@ -294,16 +287,20 @@ export default class Diagram {
     let nodesBatch = nodesToVisit;
     nodesToVisit = [];
     Promise.each(nodesBatch, node => {
-        // console.log(node.id, node.name, type);
+      // check the node still exist only the graph
+      if(this.getNodeById(node.id)) {
+        console.log(`${type}: ${node.id}, ${node.name}`);
+        // only evaluate nodes not ignored
         if (ignoreList.indexOf(node.$type) === -1) {
           this.evaluateNodeInput(node)
           this.evaluateNodeOutput(node)
         }
         let childNodes = getChildNodes(node)
         nodesToVisit = nodesToVisit.concat(childNodes)
+      }
     }).then(() => {
       if(nodesToVisit.length > 0) {
-        this.evaluateNodeData(nodesToVisit, "bfs")
+        this.evaluateNodeData(nodesToVisit, "BFS")
       }
     })
   }
@@ -316,26 +313,25 @@ function diff(obj1, obj2) {
   return JSON.stringify(obj1) !== JSON.stringify(obj2)
 }
 
-function getChildNodes(businessObject) {
+function getChildNodes(node) {
   try {
-  return businessObject.outgoing.map((ele) => ele.targetRef)
+  return node.outgoing.map((ele) => ele.targetRef)
   }
   catch {
     return []
   }
 }
-function getParentNodes(businessObject) {
+function getParentNodes(node) {
   try {
-    return businessObject.incoming.map((ele) => ele.sourceRef)
+    return node.incoming.map((ele) => ele.sourceRef)
   }
   catch {
     return []
   }
 }
-
 // TODO: connect nodes on the graph
 // eslint-disable-next-line
-function setTargetNodes(businessObject, ...businessObjects) {
+function setTargetNodes(node, ...nodes) {
 
 }
 

@@ -51,7 +51,7 @@ let reusableModule = {
       let newTransferJSON = obj2JSON(state.transferModel[payload.id])
       if(oldTransferJSON !== newTransferJSON) {
         console.log(
-          `Modify Node ${payload.id} Data :`,
+          `${payload.init ? "Load" : "Modify"} Node ${payload.id} Data :`,
           oldTransferJSON,
           '=>',
           newTransferJSON
@@ -62,7 +62,7 @@ let reusableModule = {
         // if not init loading, BFS to update all child nodes
         if(!payload.init) {
           payload.diagram.eventBus.fire('commandStack.changed', {
-            businessObject: node,
+            node: node,
           })
         }
       }
