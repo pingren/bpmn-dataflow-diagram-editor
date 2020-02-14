@@ -18,4 +18,9 @@ export default {
   bpmnRules: ['type', BpmnRules],
   // custom BpmnRenderer for node styles 自定义元素样式
   bpmnRenderer: ['type', BpmnRenderer],
+  // disable connection bendpoints control
+  bendpoints: [ 'value', '' ],
+  bendpointMove: [ 'value', ''],
+  // connectionSegmentMove: [ 'value', ''],
+  // bendpointSnapping: [ 'value', '']
 }

@@ -1,6 +1,9 @@
 // Customization Begin
 // bpmn:task, bpmn:ServiceTask, bpmn:ScriptTask, bpmn:SequenceFlow, createPathFromConnection are customized below.
-// createPathFromConnection have two versions: createPathFromConnection_scurve and createPathFromConnection_smooth
+// createPathFromConnection have three modified versions:
+// 1. createPathFromConnection_curve  (from https://forum.bpmn.io/t/bezier-curve-drawing/1130/9, default option)
+// 2. createPathFromConnection_smooth (similar to orginal connection, with rounded corner )
+// 3. createPathFromConnection_scurve (an S curve based on start and end point only)
 /* eslint-disable */
 
 import inherits from 'inherits'
@@ -64,7 +67,7 @@ export default function BpmnRenderer(
     config, eventBus, styles, pathMap,
     canvas, textRenderer, priority) {
 
-  let createPathFromConnection = createPathFromConnection_scurve
+  let createPathFromConnection = createPathFromConnection_curve
 
   BaseRenderer.call(this, eventBus, priority);
 
@@ -508,6 +511,28 @@ export default function BpmnRenderer(
     var top = -1 * element.height;
 
     transform(textBox, 0, -top, 270);
+  }
+  function createPathFromConnection_curve(connection){
+    var waypoints = connection.waypoints;
+
+    var pathData = 'm  ' + waypoints[0].x + ',' + waypoints[0].y;
+    if (waypoints.length === 2) {
+      pathData += ' L' + waypoints[1].x + ',' + waypoints[1].y;
+      return pathData;
+    } else {
+      // http://stackoverflow.com/questions/7054272/how-to-draw-smooth-curve-through-n-points-using-javascript-html5-canvas
+      pathData += 'Q';
+      var i;
+      for (i = 1; i < waypoints.length - 2; i++) {
+        var xc = (waypoints[i].x + waypoints[i + 1].x) / 2;
+        var yc = (waypoints[i].y + waypoints[i + 1].y) / 2;
+        pathData += ' ' + waypoints[i].x + ',' + waypoints[i].y;
+        pathData += ' ' + xc + ',' + yc;
+      }
+      pathData += ' ' + waypoints[i].x + ',' + waypoints[i].y;
+      pathData += ' ' + waypoints[i+1].x + ',' + waypoints[i+1].y;
+    }
+    return pathData
   }
   function createPathFromConnection_scurve(connection) {
 
