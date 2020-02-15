@@ -22,7 +22,7 @@
           <span slot="title">Datasource List
           </span>
         </template>
-        <PickerDatabase
+        <PaneDatabase
           class="submenu"
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(30vh - 51px);'"
         />
@@ -33,7 +33,7 @@
           <span slot="title">Operators Tree
           </span>
         </template>
-        <PickerOperator
+        <PaneOperator
           class="submenu"
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(70vh - 35px);'"
         />
@@ -43,13 +43,13 @@
 </template>
 
 <script>
-import PickerOperator from './PickerOperator'
-import PickerDatabase from './PickerDatabase'
+import PaneOperator from './PaneOperator'
+import PaneDatabase from './PaneDatabase'
 
 export default {
   components: {
-    PickerOperator,
-    PickerDatabase,
+    PaneOperator,
+    PaneDatabase,
   },
   data() {
     return {
