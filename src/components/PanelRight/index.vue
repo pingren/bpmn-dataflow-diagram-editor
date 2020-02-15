@@ -26,7 +26,7 @@
           class="submenu"
           :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(20vh - 51px);'"
         >
-          <PaneInfo />
+          <PaneNodeInfo />
         </div>
       </el-submenu>
       <el-submenu
@@ -90,12 +90,12 @@
 
 <script>
 import PaneProperty from './PaneProperty'
-import PaneInfo from './PaneInfo'
+import PaneNodeInfo from './PaneNodeInfo'
 export default {
   inject: ['key'],
   components: {
     PaneProperty,
-    PaneInfo,
+    PaneNodeInfo,
   },
   props: {
     activities: {
