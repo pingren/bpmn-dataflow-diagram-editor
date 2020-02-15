@@ -5,7 +5,7 @@ import CliModule from 'bpmn-js-cli'
 // customization 自定义模块
 import CustomModule from './module'
 
-import store from './model/store'
+import store from './store'
 import { operatorList } from './mock'
 import { MessageBox } from 'element-ui';
 

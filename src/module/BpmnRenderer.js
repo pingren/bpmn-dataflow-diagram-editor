@@ -67,6 +67,7 @@ export default function BpmnRenderer(
     config, eventBus, styles, pathMap,
     canvas, textRenderer, priority) {
 
+  // Change default createPathFromConnection
   let createPathFromConnection = createPathFromConnection_curve
 
   BaseRenderer.call(this, eventBus, priority);
