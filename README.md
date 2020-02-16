@@ -1,4 +1,4 @@
-# BPMNFlowEditor
+# bpmn-dataflow-diagram-editor
 
 Other languages: [中文文档](README.zh.md)
 
@@ -27,15 +27,15 @@ yarn & yarn serve
 
 - [`components`]
   - [`PanelLeft`]
-    - [`index.vue`] panel cantains panes
+    - [`index.vue`] panel contains panes
     - [`PaneDatabase.vue`] list style node picker
     - [`PaneOperator.vue`] tree style node picker
   - [`PanelRight`]
-    - [`index.vue`] panel cantains panes
+    - [`index.vue`] panel contains panes
     - [`PaneNodeInfo.vue`] node information viewer
     - [`PaneProperty.vue`] extendible property editor
   - [`PanelTop`]
-    - [`index.vue`] panel cantains buttons for editing, saving, and more
+    - [`index.vue`] panel contains buttons for editing, saving, and more
   - [`DiagramEditor.vue`] containing all the other vue components, responsible for creating diagram object and vuex state during its life cycle
   - [`ZoomSlider.vue`] slider for zooming diagram
 - [`module`]
@@ -56,27 +56,25 @@ yarn & yarn serve
 
 A diagram object is created when a tab, namely `DiagramEditor` **mounted**. Then it will be [provided/injected](https://vuejs.org/v2/api/index.html#provide-inject) to all children. Thus all child vue components can use it to control the diagram.
 
-Diagram also has some "private" functions: `evaluateNodeData`, `evaluateNodeInput`, `evaluateNodeOutput`, etc. They get called inside bpmn-js EventBus handlers, and should not be used outside.
+Diagram also has some "private" methods: `evaluateNodeData`, `evaluateNodeInput`, `evaluateNodeOutput`, etc. They get called inside bpmn-js EventBus handlers, and should not be used outside.
 
 #### Vuex State
 
-[Vuex](https://vuex.vuejs.org/) is needed because some diagram states need to be reactive in vue components. Therefore, each diagram object is accompanied with an vuex state and keeps track of vuex state by a key.
+[Vuex](https://vuex.vuejs.org/) is needed because some diagram states need to be reactive in vue components. Therefore, each diagram object is accompanied with an vuex state store and keeps track of the store by a key.
 
-This project [reuse a same vuex module](https://vuex.vuejs.org/guide/modules.html#module-reuse) since there could be mutiple diagrams because of tabs. A vuex module is [registered](https://vuex.vuejs.org/guide/modules.html#dynamic-module-registration) when a tab, namely `DiagramEditor` **created** and will be unregistered before destoryed.
+This project [reuse a same vuex module](https://vuex.vuejs.org/guide/modules.html#module-reuse) since there could be mutiple diagrams because of tabs. A vuex module is [registered](https://vuex.vuejs.org/guide/modules.html#dynamic-module-registration) when a tab, namely `DiagramEditor` **created** and will be removed before vue components destoryed.
 
-Each vuex module contains basic states such as currentNodeId, isRunning, etc. It also contains three model objects: inputModel, transferModel, outputModel.
+A vuex module contains basic states of diagram such as currentNodeId, isRunning, etc. It also contains three node data model objects: inputModel, transferModel, outputModel.
 
-#### Node Property Model
+#### Node Data Model
 
-Every node have its own property. Properties are represneted in the transferModel. User could change property inside the property pane.
+Every node have its own property. Properties are stored in the transferModel. User could change property inside the property pane.
 
-A node can also have inputs and outputs depending on its property, diagram structure and node input & output config. They are represented in the inputModel and outputModel.
+A node can also have inputs and outputs, which stored in the inputModel and outputModel. Inputs and outputs depends on node properties, diagram structure and node input & output config:
 
-Each node have a input and output config:
+- node input config: what and how the collection of a node parents' output( outputModel) are used and transformed into its inputModel.
 
-- input config: what and how the collection of a node parents' outputModel are used and transformed into its inputModel.
-
-- output config: hat and how the property of node, are used and transformed into its outputModel.
+- node output config: what and how the property(transferModel) of node, are used and transformed into its outputModel.
 
 Both inputModel, outputModel are updated automatically. Core logic is in the Diagram.js based on a Breadth-First Traversal.
 
@@ -91,7 +89,7 @@ Both inputModel, outputModel are updated automatically. Core logic is in the Dia
 
 ### Related Projects & Products
 
-Below are projects and products utilize a dataflow diagram editor
+Below are some projects and products utilize a dataflow-like diagram editor:
 
 - [AI-Blocks](https://github.com/MrNothing/AI-Blocks)
 
