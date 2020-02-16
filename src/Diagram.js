@@ -221,10 +221,18 @@ export default class Diagram {
   let config = operatorList.find(
     item => String(item.id) === String(operatorId)
   )
+  const getParentNodes = (node) => {
+    try {
+      return this.cli.element(node.id).incoming.map(connection => connection.source.businessObject)
+    }
+    catch {
+      return []
+    }
+  }
   if(config.input) {
     let parentNodes = getParentNodes(node)
     // console.log('parentNodes:', parentNodes)
-    let parentOutputs = parentNodes.map(node => store.state[this.key].outputModel[node.id]).filter(item => item !== {} && item !== undefined)
+    let parentOutputs = parentNodes.map(parentNode => store.state[this.key].outputModel[parentNode.id]).filter(item => item !== {} && item !== undefined)
     // console.log('parentOuputs:', parentOutputs)
     // config.input is an array of object, pick sepcific key arrays as nodeInput, and flatmap if needed
     // Example: input:[{key: ['c7-1','c7-2'], target: 'c7',mode: 'flatMap'}] means pick 'c7-1','c7-2', flatten result into c7
@@ -280,6 +288,14 @@ export default class Diagram {
   }
   // bfs eval nodes asynchronously
   _evaluateNodeData(nodesToVisit, type = ''){
+    const getChildNodes = (node) => {
+      try {
+        return this.cli.element(node.id).outgoing.map(connection => connection.target.businessObject)
+      }
+      catch {
+        return []
+      }
+    }
     // TODO: use DFS check if there is a loop in the diagram before continue
     if(nodesToVisit.length === undefined && nodesToVisit.id) {
       nodesToVisit = [nodesToVisit]
@@ -305,6 +321,7 @@ export default class Diagram {
     })
   }
   _addDebugOverlayToNode(node){
+    // return
     let div = document.createElement("button");
     let text = document.createTextNode(`${node.id}`);
     div.appendChild(text);
@@ -342,22 +359,7 @@ function diff(obj1, obj2) {
   return JSON.stringify(obj1) !== JSON.stringify(obj2)
 }
 
-function getChildNodes(node) {
-  try {
-  return node.outgoing.map((ele) => ele.targetRef)
-  }
-  catch {
-    return []
-  }
-}
-function getParentNodes(node) {
-  try {
-    return node.incoming.map((ele) => ele.sourceRef)
-  }
-  catch {
-    return []
-  }
-}
+
 // TODO: connect nodes on the graph
 // eslint-disable-next-line
 function setTargetNodes(node, ...nodes) {
