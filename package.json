@@ -31,7 +31,6 @@
     "vue-template-compiler": "^2.6.10"
   },
   "resolutions": {
-    "serialize-javascript": "^2.1.2",
-    "copy-webpack-plugin": "^5.1.0"
+    "serialize-javascript": "^2.1.2"
   }
 }
