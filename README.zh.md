@@ -54,15 +54,15 @@ yarn & yarn serve
 
 `Diagram` 是表示数据流图的类。它在 constructor 里创建了 bpmn-js 相关对象并且将它们绑定到实例上。它提供了 `importXML` 和 `exportXML` 方法，以及其它图操作方法（比如 `createNode`）。
 
-当一个 tab，即 `DiagramEditor` 组件 **mounted** 时，它会创建一个 diagram 对象。接着它会将其用 [provided/injected API](https://vuejs.org/v2/api/index.html#provide-inject) 注入到其所有子组件中。如此一来，所有的 vue 子组件都可以使用 diagram 对象来控制图。
+当一个 tab，即 `DiagramEditor` 组件 **mounted** 时，它会创建一个 diagram 对象。接着它会将其用 [provided/injected API](https://cn.vuejs.org/v2/api/index.html#provide-inject) 注入到其所有子组件中。如此一来，所有的 vue 子组件都可以使用 diagram 对象来控制图。
 
 Diagram 也有一些“私有”方法：`evaluateNodeData`、`evaluateNodeInput`、`evaluateNodeOutput` 等等。 它们在 bpmn-js EventBus 回调中调用，不应该被外部使用。
 
 #### Vuex 状态
 
-一些流程图的状态应该是响应式的，所以需要使用 [vuex](https://vuex.vuejs.org/)。每个 diagram 对象都伴随着一个 vuex 状态 store，并使用一个 key 跟踪它。
+一些流程图的状态应该是响应式的，所以需要使用 [vuex](https://vuex.vuejs.org/zh/)。每个 diagram 对象都伴随着一个 vuex 状态 store，并使用一个 key 跟踪它。
 
-因为可能有多个 tab 和多个图，本项目 [重用了相同的 vuex 模块](https://vuex.vuejs.org/guide/modules.html#module-reuse)。当一个 tab，即 `DiagramEditor` 组件 **created** 时，vuex 模块将被[注册](https://vuex.vuejs.org/guide/modules.html#dynamic-module-registration)，并在组件销毁前卸载。
+因为可能有多个 tab 和多个图，本项目 [重用了相同的 vuex 模块](https://vuex.vuejs.org/zh/guide/modules.html#module-reuse)。当一个 tab，即 `DiagramEditor` 组件 **created** 时，vuex 模块将被[注册](https://vuex.vuejs.org/zh/guide/modules.html#dynamic-module-registration)，并在组件销毁前卸载。
 
 vuex 模块包含了流程图的基本状态比如 currentNodeId、isRunning 等等。它也包含了三个节点数据模型对象：inputModel、transferModel、outputModel。
 
