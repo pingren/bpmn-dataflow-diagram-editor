@@ -49,6 +49,7 @@ export const operatorList = [
         ],
       },
     ],
+    output: [{key:'option3',rename:'c7-1' }, {key:'c2' }]
   },
   {
     id: 10,
@@ -84,19 +85,32 @@ export const operatorList = [
         type: 'mselect',
         options: [
           {
-            value: 'A',
-            label: 'A',
+            value: 'D',
+            label: 'D',
           },
           {
-            value: 'B',
-            label: 'B',
+            value: 'E',
+            label: 'E',
           },
           {
-            value: 'C',
-            label: 'C',
+            value: 'F',
+            label: 'F',
           },
         ],
       },
+      {
+        label: 'c7: parent Nodes Config 3',
+        prop: 'c7',
+        type: 'select',
+        mode: 'input'
+        // options:
+      },
     ],
+    input:[{
+      key: ['c7-1','c7-2'],
+      target: 'c7',
+      mode: 'flatMap'
+    }],
+    output: [{key:'c6', rename:'c7-2' }]
   },
 ]

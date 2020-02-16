@@ -1,15 +1,17 @@
-# BPMN 流程编辑器
+# BPMN 数据流图编辑器
 
-其它语言: [English](README.md)
+其它语言：[English](README.md)
 
-本工程是一个流程编辑器的例子。它基于 bpmn-js 开发，并根据我自己的需要定制。它并不是一个完整的项目，仅用于展示和学习。因为我使用 Vue.js 开发，所以你需要知道一些 Vue.js 的知识来阅读和理解源代码。
+本项目是一个集成流程编辑器的例子。它基于定制的 bpmn-js 和 Vue.js 开发。你需要知道 Vue.js 的知识来阅读和理解源代码。
 
 ## 功能
 
-- 编辑: 使用简单的拖动和点击创建一个流程图。![gif](screencast1.gif)
-- 保存 & 读取: 保存/读取自定义的 BPMN XML。![gif](screencast2.gif)
-- 属性面板: 可扩展的节点属性编辑面板, 绑定属性 JSON 到 XML 模型。![gif](screencast3.gif)
-- 动画效果: 为节点展示任意的 CSS 样式动画。![gif](screencast4.gif)
+- 可视化编辑：使用简单的点击、拖拽、放置编辑数据流图。 ![gif](screencast/screencast1.gif)
+- 保存和读取 XML：保存/读取图和节点信息。 ![gif](screencast/screencast2.gif)
+- 属性和数据转移：可扩展的节点属性编辑面板，且数据可以在节点间流动。 ![gif](screencast/screencast3.gif)
+- 动画效果：为节点展示任意的 CSS 样式动画。 (**旧版**实现) ![gif](screencast/screencast4.gif)
+- 无级缩放：流畅放大和缩小 (比[原版的逐级缩放](http://demo.bpmn.io/)更加平滑) ![gif](screencast/screencast5.gif)
+- 多图操作：同时打开和编辑多个图。 ![gif](screencast/screencast6.gif)
 
 ## 开始
 
@@ -19,50 +21,62 @@ cd BPMNFlowEditor
 yarn & yarn serve
 ```
 
-## 解释
+## 设计
 
-### 目录结构
+### 项目结构
 
 - [`components`]
-  - [`moudle`]
-    - [`xxx.js...`] 自定义 BPMN.js 模块
-    - [`index.js`] 自定义模块帮助文件 & 禁用一些默认模块
-  - [`BPMNEditor`] 带有主要功能的图编辑器
-  - [`DatabasePicker.vue`] 一个节点列表选择器
-  - [`OperatorPicker.vue`] 一个节点树形选择器
-  - [`PaneLeft.vue`] 左侧面板, 包含 `DatabasePicker` & `OperatorPicker`
-  - [`PaneProperty.vue`] 一个可扩展的属性面板
-  - [`PaneRight.vue`] 右侧面板, 包含 `PaneProperty`
-- [`App.vue`] 主程序, 包含 `PaneLeft` & `BPMNEditor` & `PaneRight`
+  - [`PanelLeft`]
+    - [`index.vue`] Panel 包含 Pane
+    - [`PaneDatabase.vue`] list style node picker
+    - [`PaneOperator.vue`] tree style node picker
+  - [`PanelRight`]
+    - [`index.vue`] Panel 包含 Pane
+    - [`PaneNodeInfo.vue`] 节点信息预览
+    - [`PaneProperty.vue`] 可扩展的节点属性编辑面板
+  - [`PanelTop`]
+    - [`index.vue`] Panel 包含编辑、保存等功能的按钮
+  - [`DiagramEditor.vue`] 包含了所有的 vue 组件，负责在其生命周期内创建 diagram 对象和 vuex 状态
+  - [`ZoomSlider.vue`] 缩放滑块
+- [`module`]
+  - [`xxx.js...`] 自定义 bpmn.js 模块，自定义的内容注释在文件中
+  - [`index.js`] 自定义 bpmn.js 模块帮助文件，禁用了部分模块
+- [`store`]
+  - [`module.js`] vuex 重用模块
+  - [`index.js`] vuex 根状态，控制模块动态注册
+- [`App.vue`] app 入口，包含了 el-tabs，每个 tab 拥有一个 DiagramEditor
+- [`Diagram.js`] Diagram 类
 - [`mock.js`] 模拟后端返回的数据
 
-### 实现
+### 解释说明
 
-#### 拖拽节点
+#### Diagram.js
 
-- 在 `DatabasePicker` & `OperatorPicker` 内允许拖拽。
-- 在 `bpmnModeler`的 div 容器监听 `drop` 事件. 请阅读 [HTML 拖放 API](https://developer.mozilla.org/zh-CN/docs/Web/API/HTML_Drag_and_Drop_API)。
-- 使用 bpmn-js-cli `create()` 方法在拖放位置（如果画布本身被拖动过，也将计算画布的 offset）创建元素。
-- 设置节点标签和 operator/database ID(注意: 这个 `ID` 与图内唯一的节点 `id` 不同)
-- 调用 `getTextWidth()` 来计算标签宽度，为元素设置新的宽和高。
-- 使用 `interactionEvents` 来选择节点, 因此右侧面盘也会相应地更新。
+`Diagram` 是表示数据流图的类。它在 constructor 里创建了 bpmn-js 相关对象并且将它们绑定到实例上。它提供了 `importXML` 和 `exportXML` 方法，以及其它图操作方法（比如 `createNode`）。
 
-#### 属性面板
+当一个 tab，即 `DiagramEditor` 组件 **mounted** 时，它会创建一个 diagram 对象。接着它会将其用 [provided/injected API](https://cn.vuejs.org/v2/api/index.html#provide-inject) 注入到其所有子组件中。如此一来，所有的 vue 子组件都可以使用 diagram 对象来控制图。
 
-- operators 可能会有可以编辑的属性。请查看 `mock.js` 中的 `operatorList`。
-- 当在图中选择一个节点，属性面板的表单会根据 `props` 的配置变化。
-- 当属性修改的时候，它会保存 `JSON.stringnify`过的表单数据到 `PROPERTY` 内。
-- 双击节点会展示它的信息和处理过的 `PROPERTY`。
+Diagram 也有一些“私有”方法：`evaluateNodeData`、`evaluateNodeInput`、`evaluateNodeOutput` 等等。 它们在 bpmn-js EventBus 回调中调用，不应该被外部使用。
 
-#### 动画效果
+#### Vuex 状态
 
-- 动画通过 bpmn-js 的 `overlays` 实现。它基于节点所以有局限性。
-- 添加一些 CSS 样式，并在需要时调用方法添加/删除 overlays。
-- 通过 `clearSymbols()` 来删除所有的 overlays.
+一些流程图的状态应该是响应式的，所以需要使用 [vuex](https://vuex.vuejs.org/zh/)。每个 diagram 对象都伴随着一个 vuex 状态 store，并使用一个 key 跟踪它。
 
-## 问题
+因为可能有多个 tab 和多个图，本项目 [重用了相同的 vuex 模块](https://vuex.vuejs.org/zh/guide/modules.html#module-reuse)。当一个 tab，即 `DiagramEditor` 组件 **created** 时，vuex 模块将被[注册](https://vuex.vuejs.org/zh/guide/modules.html#dynamic-module-registration)，并在组件销毁前卸载。
 
-暂时没有，欢迎问题和建议！
+vuex 模块包含了流程图的基本状态比如 currentNodeId、isRunning 等等。它也包含了三个节点数据模型对象：inputModel、transferModel、outputModel。
+
+#### 节点数据模型
+
+每个节点有着它的属性，保存在 transferModel 中。用户可以在节点属性编辑面板中改变属性。
+
+一个节点还可以有输入和输出数据，保存在 inputModel 和 outputModel 中。输入和输出数据由节点属性，图的拓扑结构以及节点的输入输出的配置共同决定：
+
+- 节点输入配置：决定了一个节点如何使用其所有父节点的输出(outputModel) 生成该节点的输入。
+
+- 节点输出配置：决定了一个节点如何使用其属性(transferModel) 生成该节点的输出。
+
+inputModel 和 outputModel 都将自动更新。 核心逻辑在 Diagram.js 之中，使用广度优先遍历。
 
 ## 项目依赖
 
@@ -70,3 +84,25 @@ yarn & yarn serve
 - [bpmn-js-cli](https://github.com/bpmn-io/bpmn-js-cli) - 使开发调试更容易的帮助库。
 - [vue](https://vuejs.org) - 一个搭建用户界面的渐进式框架。
 - [element-ui](https://element.eleme.io) - 广泛使用的 UI 库。
+
+## 杂项
+
+### 相关项目和产品
+
+以下是一些使用类似数据流图编辑器的工程和项目：
+
+- [AI-Blocks](https://github.com/MrNothing/AI-Blocks)
+
+- [腾讯 Oceanus-ML](https://data.qq.com/article?id=3921)
+
+- [Azure Machine Learing designer](https://docs.microsoft.com/en-us/azure/machine-learning/concept-designer)
+
+- [Salesforce Dataflow Editor](https://help.salesforce.com/articleView?id=bi_integrate_dataflow_configure_editor.htm)
+
+### 旧版本
+
+  代码曾经重构并且有了很大的变化，你可以在分支 `archive-codebase` 上查看旧版本。请**注意**它的设计和结构与现在的主分支**大相径庭**。
+
+### 问题
+
+暂时没有，欢迎问题和建议！

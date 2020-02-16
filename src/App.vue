@@ -1,102 +1,70 @@
 <template>
   <div id="app">
-    <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
-    <el-container>
-      <PaneLeft />
-      <BPMNEditor
-        style="height:calc(100vh - 25px);width:100%;"
-        @node-click="nodeClick"
-        @run="run"
-      />
-      <PaneRight
-        v-model="currentNode"
-        :operator-config="currentConfig"
-        :activities="activities"
-      />
-    </el-container>
+    <el-tabs
+      v-model="tabName"
+      type="card"
+      addable
+      :closable="tabArray.length > 1"
+      @edit="handleTabsEdit"
+    >
+      <el-tab-pane
+        v-for="(item) in tabArray"
+        :key="item.name"
+        :label="item.title"
+        :name="item.name"
+      >
+        <keep-alive>
+          <DiagramEditor v-if="item.name === tabName" />
+        </keep-alive>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
 <script>
-import PaneLeft from './components/PaneLeft'
-import PaneRight from './components/PaneRight'
-import BPMNEditor from './components/BPMNEditor.vue'
-
-import { operatorList } from './mock.js'
-import { setTimeout } from 'timers'
-
+import DiagramEditor from './components/DiagramEditor'
 export default {
   name: 'App',
   components: {
-    BPMNEditor,
-    PaneLeft,
-    PaneRight,
+    DiagramEditor,
   },
-  data: function() {
+  data() {
     return {
-      currentConfig: undefined,
-      currentNode: undefined,
-      activities: [],
+      tabName: '0',
+      tabArray: [
+        {
+          title: 'Project *',
+          name: '0',
+        },
+      ],
     }
   },
   methods: {
-    nodeClick(node) {
-      this.currentNode = node
-      if (node.$attrs.ID) {
-        let operator = operatorList.find(
-          item => String(item.id) === String(node.$attrs.ID)
-        )
-        if (operator) {
-          this.currentConfig = operator
-        } else {
-          this.currentConfig = undefined
-        }
+    handleTabsEdit(targetName, action) {
+      if (action === 'add') {
+        let newTabName = String(Date.now())
+        this.tabArray.push({
+          title: 'Project *',
+          name: newTabName,
+        })
+        this.tabName = newTabName
       }
-    },
-    run() {
-      this.activities = []
-      let activities = [
-        {
-          content: 'A completed!',
-          timestamp: '2019-04-01 20:46',
-          size: 'large',
-          type: 'success',
-          icon: 'el-icon-success',
-        },
-        {
-          content: 'B is running',
-          timestamp: '2019-04-01 20:47',
-          size: 'large',
-          type: 'primary',
-          icon: 'el-icon-more',
-        },
-        {
-          content: 'Config errors',
-          timestamp: '2019-04-01 20:48',
-          size: 'large',
-          type: 'warning',
-          icon: 'el-icon-warning',
-        },
-        {
-          content: 'Stop running',
-          timestamp: '2019-04-01 20:49',
-          size: 'large',
-          type: 'danger',
-          icon: 'el-icon-error',
-        },
-      ]
-      activities.forEach((item, index) => {
-        setTimeout(() => {
-          this.activities.push(item)
-        }, (index + 1) * 2000)
-      })
+      if (action === 'remove') {
+        let activeName = this.tabName
+        let tabs = this.tabArray
+        if (activeName === targetName) {
+          let index = tabs.findIndex(tab => tab.name === activeName)
+          if (index) {
+            let nextTab = tabs[index + 1] || tabs[index - 1]
+            if (nextTab) {
+              activeName = nextTab.name
+            }
+          }
+        }
+        this.tabName = activeName
+        this.tabArray = tabs.filter(tab => tab.name !== targetName)
+      }
     },
   },
 }
 </script>
-
-<style>
-#app {
-  text-align: center;
-}
-</style>
