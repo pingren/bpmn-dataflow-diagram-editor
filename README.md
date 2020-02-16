@@ -72,9 +72,9 @@ Every node have its own property. Properties are stored in the transferModel. Us
 
 A node can also have inputs and outputs, which stored in the inputModel and outputModel. Inputs and outputs depends on node properties, diagram structure and node input & output config:
 
-- node input config: what and how the collection of a node parents' output( outputModel) are used and transformed into its inputModel.
+- node input config: what and how the collection of a node parents' output (outputModel) are used and transformed into its inputModel.
 
-- node output config: what and how the property(transferModel) of node, are used and transformed into its outputModel.
+- node output config: what and how the property (transferModel) of node, are used and transformed into its outputModel.
 
 Both inputModel, outputModel are updated automatically. Core logic is in the Diagram.js based on a Breadth-First Traversal.
 
