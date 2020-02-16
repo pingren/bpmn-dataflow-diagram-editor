@@ -20,7 +20,6 @@ const processName = 'Process_1'
 const StartEventName = 'StartEvent_1'
 // const EndEventName = 'EndEvent_1'
 
-
 export default class Diagram {
 
   constructor(container, key = Date.now()) {
@@ -59,7 +58,7 @@ export default class Diagram {
       // })
       // nodes create event
       this.eventBus.on('commandStack.shape.create.postExecute', 0, event => {
-        this.addDebugOverlayToNode(event.context.shape.businessObject)
+        this._addDebugOverlayToNode(event.context.shape.businessObject)
       })
       // click event: fire vuex mutation 'selectNode' with clicked node id
       this.eventBus.on('element.click', 0, event => {
@@ -77,11 +76,11 @@ export default class Diagram {
           return false
         }
       })
-      // connection events: fire evaluateNodeData when connection logic changed
+      // connection events: fire _evaluateNodeData when connection logic changed
       this.eventBus.on(['connection.add', 'connection.removed'], 0, (event) => {
         if(event.type === 'connection.add'){
           let node = event.element.target.businessObject
-          this.evaluateNodeData(node, 'newConnectionToNode')
+          this._evaluateNodeData(node, 'newConnectionToNode')
           // connection event: fire vuex mutation 'selectNode' with target node, this should be disabled when importing graph
           store.commit('selectNode', node)
         }
@@ -93,11 +92,11 @@ export default class Diagram {
       // commandStack event will fire when node attrs change and connections removed
       this.eventBus.on('commandStack.changed', 0 , event =>{
         if(event.node){
-          this.evaluateNodeData(event.node, 'nodeAttrsChangedByUser')
+          this._evaluateNodeData(event.node, 'nodeAttrsChangedByUser')
         }
         else {
           for(let node of this.nodesToEvaluate) {
-            this.evaluateNodeData(node, 'connectionRemovedByUser')
+            this._evaluateNodeData(node, 'connectionRemovedByUser')
           }
           this.nodesToEvaluate = new Set()
         }
@@ -115,11 +114,11 @@ export default class Diagram {
       // setTransfer for all nodes from xml
       for(let node of nodes) {
         store.commit('setTransfer', { id: node.id, obj: getProperty(node), init: true, diagram: this })
-        this.addDebugOverlayToNode(node)
+        this._addDebugOverlayToNode(node)
       }
       // BFS from StartEvent Node to get vuex model
       if(nodes.length > 0) {
-        this.evaluateNodeData(this.cli.element(StartEventName).businessObject, 'Init BFS')
+        this._evaluateNodeData(this.cli.element(StartEventName).businessObject, 'Init BFS')
       }
     }
     // import done, register eventBus event
@@ -215,8 +214,8 @@ export default class Diagram {
   setDraggingNode(node) {
     this.draggingNode = node
   }
-  // evaluateNodeInput from parents' nodeOutput according to config.input & then updateTransfer
-  evaluateNodeInput(node) {
+  // _evaluateNodeInput from parents' nodeOutput according to config.input & then updateTransfer
+  _evaluateNodeInput(node) {
 
   let operatorId = getAttrs(node).ID
   let config = operatorList.find(
@@ -250,7 +249,7 @@ export default class Diagram {
   }
 }
   // evaluateNodeOuput from nodeTransfer according to config.output
-  evaluateNodeOutput(node){
+  _evaluateNodeOutput(node){
 
     let operatorId = getAttrs(node).ID
     let property = store.state[this.key].transferModel[node.id]
@@ -280,7 +279,7 @@ export default class Diagram {
     }
   }
   // bfs eval nodes asynchronously
-  evaluateNodeData(nodesToVisit, type = ''){
+  _evaluateNodeData(nodesToVisit, type = ''){
     // TODO: use DFS check if there is a loop in the diagram before continue
     if(nodesToVisit.length === undefined && nodesToVisit.id) {
       nodesToVisit = [nodesToVisit]
@@ -293,19 +292,19 @@ export default class Diagram {
         console.log(`${type}: ${node.id}, ${node.name}`);
         // only evaluate nodes not ignored
         if (ignoreList.indexOf(node.$type) === -1) {
-          this.evaluateNodeInput(node)
-          this.evaluateNodeOutput(node)
+          this._evaluateNodeInput(node)
+          this._evaluateNodeOutput(node)
         }
         let childNodes = getChildNodes(node)
         nodesToVisit = nodesToVisit.concat(childNodes)
       }
     }).then(() => {
       if(nodesToVisit.length > 0) {
-        this.evaluateNodeData(nodesToVisit, "BFS")
+        this._evaluateNodeData(nodesToVisit, "BFS")
       }
     })
   }
-  addDebugOverlayToNode(node){
+  _addDebugOverlayToNode(node){
     let div = document.createElement("button");
     let text = document.createTextNode(`${node.id}`);
     div.appendChild(text);
