@@ -2,14 +2,16 @@
 
 Other languages: [中文文档](README.zh.md)
 
-This project is an example of a flow diagram editor. It is built upon bpmn-js and customized based on what I need. It is an **incomplete** project and is for demostartion and learning only. Since I use Vue.js to create this. You will need some Vue.js knowledge to be able to read and understand source code.
+This demo is an integrated dataflow diagram editor. It is built upon customized bpmn-js and Vue.js. You will need Vue.js knowledge to be able to read and understand source code.
 
 ## Features
 
-- Edit: create a flow-like chart by simply drag & click. ![gif](screencast1.gif)
-- Save & Load: save to / load from a customized BPMN XML. ![gif](screencast2.gif)
-- Property panel: an extendible property panel binding JSON to XML model. ![gif](screencast3.gif)
-- Animation: display any CSS styles animation on nodes.![gif](screencast4.gif)
+- Visual Editing: edit a dataflow diagram by click, drag and drop. ![gif](screencast/screencast1.gif)
+- Save & Load XML: save & load diagram with nodes data. ![gif](screencast/screencast2.gif)
+- Property & Data Transfer: extendible property panel and data could travel between nodes. ![gif](screencast/screencast3.gif)
+- Animation: display any CSS styles animation on nodes. (implemented in the **OLD** codebase) ![gif](screencast/screencast4.gif)
+- Seamless Zooming: Zoom in and out canvas soomthly (soomther than [original step zooming](http://demo.bpmn.io/)) ![gif](screencast/screencast5.gif)
+- Mutiple Diagrams: Open and edit mutiple diagrams at the same time. ![gif](screencast/screencast6.gif)
 
 ## Getting Started
 
@@ -19,50 +21,64 @@ cd BPMNFlowEditor
 yarn & yarn serve
 ```
 
-## Explanation
+## Design
 
-### Architecture
+### Project Structure
 
 - [`components`]
-  - [`moudle`]
-    - [`xxx.js...`] custom BPMN.js modules
-    - [`index.js`] custom modules helper & disable some default modules
-  - [`BPMNEditor`] core diagram editor with main functionality
-  - [`DatabasePicker.vue`] a list style node picker
-  - [`OperatorPicker.vue`] a tree style node picker
-  - [`PaneLeft.vue`] left panel, containing `DatabasePicker` & `OperatorPicker`
-  - [`PaneProperty.vue`] an extendible property editor
-  - [`PaneRight.vue`] right panel, containing `PaneProperty`
-- [`App.vue`] main app, containing `PaneLeft` & `BPMNEditor` & `PaneRight`
+  - [`PanelLeft`]
+    - [`index.vue`] panel cantains panes
+    - [`PaneDatabase.vue`] list style node picker
+    - [`PaneOperator.vue`] tree style node picker
+  - [`PanelRight`]
+    - [`index.vue`] panel cantains panes
+    - [`PaneNodeInfo.vue`] node information viewer
+    - [`PaneProperty.vue`] extendible property editor
+  - [`PanelTop`]
+    - [`index.vue`] panel cantains buttons for editing, saving, and more
+  - [`DiagramEditor.vue`] containing all the other vue components, responsible for creating diagram object and vuex state during its life cycle
+  - [`ZoomSlider.vue`] slider for zooming diagram
+- [`module`]
+  - [`xxx.js...`] bpmn.js module, customization documented inside each file
+  - [`index.js`] custom bpmn.js module helper & disable some modules
+- [`store`]
+  - [`module.js`] vuex reuseable module
+  - [`index.js`] vuex root state, controling dynamic module
+- [`App.vue`] app entry, containing el-tabs and each tab has a DiagramEditor
+- [`Diagram.js`] Diagram class
 - [`mock.js`] mock data from back-end
 
-### Implementation
+### Explanation
 
-#### Dragging Node
+#### Diagram.js
 
-- allow dragging inside `DatabasePicker` & `OperatorPicker`.
-- the `drop` event is listend on div container of `bpmnModeler`. Please checkout [HTML Drag and Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API).
-- use bpmn-js-cli `create()` the new element on drop location (with canvas offset if canvas itself is dragged).
-- set node label & operator/database ID(note: this `ID` is different from inner unique node `id` in the diagram).
-- call `getTextWidth()` to calculate label width. Set new width & height visually and into XML.
-- use `interactionEvents` to select the node, thus the right panel is updated accordingly.
+`Diagram` is a class representing a dataflow diagram. It creates actual bpmn-js objects and bind them to the instance in its constructor. It provides `importXML` and `exportXML` methods, as well as other diagram manipulation methods(e.g. `createNode`) if needed.
 
-#### Property Panel
+A diagram object is created when a tab, namely `DiagramEditor` **mounted**. Then it will be [provided/injected](https://vuejs.org/v2/api/index.html#provide-inject) to all children. Thus all child vue components can use it to control the diagram.
 
-- operators may have property to configure. Please check `operatorList` in `mock.js`.
-- when select a node in the diagram, the panel form will change depending on what `props` config is.
-- when modified, it will save form data into `PROPERTY` with `JSON.stringnify`.
-- double click the node will show its information with parsed `PROPERTY`.
+Diagram also has some "private" functions: `evaluateNodeData`, `evaluateNodeInput`, `evaluateNodeOutput`, etc. They get called inside bpmn-js EventBus handlers, and should not be used outside.
 
-#### Animation
+#### Vuex State
 
-- animation is achieved by using bpmn-js `overlays`. It is based on nodes with some limitation.
-- add some CSS styles, and add/remove overlays programmatically when needed.
-- with `clearSymbols()` to remove all overlays.
+[Vuex](https://vuex.vuejs.org/) is needed because some diagram states need to be reactive in vue components. Therefore, each diagram object is accompanied with an vuex state and keeps track of vuex state by a key.
 
-## Issues
+This project [reuse a same vuex module](https://vuex.vuejs.org/guide/modules.html#module-reuse) since there could be mutiple diagrams because of tabs. A vuex module is [registered](https://vuex.vuejs.org/guide/modules.html#dynamic-module-registration) when a tab, namely `DiagramEditor` **created** and will be unregistered before destoryed.
 
-None for now. Issues and Suggestions are welcome!
+Each vuex module contains basic states such as currentNodeId, isRunning, etc. It also contains three model objects: inputModel, transferModel, outputModel.
+
+#### Node Property Model
+
+Every node have its own property. Properties are represneted in the transferModel. User could change property inside the property pane.
+
+A node can also have inputs and outputs depending on its property, diagram structure and node input & output config. They are represented in the inputModel and outputModel.
+
+Each node have a input and output config:
+
+- input config: what and how the collection of a node parents' outputModel are used and transformed into its inputModel.
+
+- output config: hat and how the property of node, are used and transformed into its outputModel.
+
+Both inputModel, outputModel are updated automatically. Core logic is in the Diagram.js based on a Breadth-First Traversal.
 
 ## Built With
 
@@ -70,3 +86,25 @@ None for now. Issues and Suggestions are welcome!
 - [bpmn-js-cli](https://github.com/bpmn-io/bpmn-js-cli) - a support library to relief development.
 - [vue](https://vuejs.org) - a progressive framework for building user interfaces.
 - [element-ui](https://element.eleme.io) - a widely used UI Library.
+
+## Miscellaneous
+
+### Related Projects & Products
+
+Below are projects and products utilize a dataflow diagram editor
+
+- [AI-Blocks](https://github.com/MrNothing/AI-Blocks)
+
+- [Tencent Oceanus-ML](https://data.qq.com/article?id=3921)
+
+- [Azure Machine Learing designer](https://docs.microsoft.com/en-us/azure/machine-learning/concept-designer)
+
+- [Salesforce Dataflow Editor](https://help.salesforce.com/articleView?id=bi_integrate_dataflow_configure_editor.htm)
+
+### Old Version
+
+  The code was refactored and had major changes. You can check old version on branch `archive-codebase`. Please **NOTE** its design and structure is **quite different** from current `master` branch.
+
+### Issues
+
+None for now. Issues and Suggestions are welcome!
