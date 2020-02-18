@@ -1,24 +1,22 @@
 <template>
-  <div id="app">
-    <el-tabs
-      v-model="tabName"
-      type="card"
-      addable
-      :closable="tabArray.length > 1"
-      @edit="handleTabsEdit"
+  <el-tabs
+    v-model="tabName"
+    type="card"
+    addable
+    :closable="tabArray.length > 1"
+    @edit="handleTabsEdit"
+  >
+    <el-tab-pane
+      v-for="(item) in tabArray"
+      :key="item.name"
+      :label="item.title"
+      :name="item.name"
     >
-      <el-tab-pane
-        v-for="(item) in tabArray"
-        :key="item.name"
-        :label="item.title"
-        :name="item.name"
-      >
-        <keep-alive>
-          <DiagramEditor v-if="item.name === tabName" />
-        </keep-alive>
-      </el-tab-pane>
-    </el-tabs>
-  </div>
+      <keep-alive>
+        <DiagramEditor v-if="item.name === tabName" />
+      </keep-alive>
+    </el-tab-pane>
+  </el-tabs>
 </template>
 
 <script>
@@ -68,3 +66,14 @@ export default {
   },
 }
 </script>
+<style scoped>
+.el-tabs {
+  height: 100%;
+}
+>>> .el-tabs__content {
+  height: 100%;
+}
+>>> .el-tab-pane {
+  height: 100%;
+}
+</style>

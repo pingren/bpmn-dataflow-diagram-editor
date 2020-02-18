@@ -1,7 +1,7 @@
 <template>
   <el-card
     class="left-pane"
-    :body-style="{ padding:'0', }"
+    :body-style="{ padding:'0' }"
   >
     <el-menu
       :default-openeds="['1','2','3','4']"
@@ -49,41 +49,6 @@
           </keep-alive>
         </el-menu-item-group>
       </el-submenu>
-      <el-submenu
-        v-if="activities && activities.length"
-        index="3"
-      >
-        <template slot="title">
-          <i class="el-icon-view" />
-          <span slot="title">Progress
-          </span>
-        </template>
-        <el-menu-item-group
-          ref="activities"
-          class="submenu"
-          :style="isCollapse ? 'max-height: 90vh;' : 'max-height: calc(40vh - 180px);'"
-        >
-          <el-timeline
-            v-if="activities"
-            style="padding-right:1em;"
-          >
-            <transition-group name="list">
-              <el-timeline-item
-                v-for="(activity) in activities"
-                :key="activity.timestamp"
-                :icon="activity.icon"
-                :type="activity.type"
-                :color="activity.color"
-                :size="activity.size"
-                :timestamp="activity.timestamp"
-              >
-                {{ activity.content }}
-              </el-timeline-item>
-            </transition-group>
-          </el-timeline>
-        </el-menu-item-group>
-        </div>
-      </el-submenu>
     </el-menu>
   </el-card>
 </template>
@@ -97,16 +62,9 @@ export default {
     PaneProperty,
     PaneNodeInfo,
   },
-  props: {
-    activities: {
-      type: Array,
-      default: undefined,
-    },
-  },
   data() {
     return {
       isCollapse: false,
-      radio: '1',
     }
   },
   computed: {
@@ -115,16 +73,6 @@ export default {
     },
     currentNodeId() {
       return this.state.currentNodeId
-    },
-  },
-  watch: {
-    activities() {
-      if (this.activities && this.activities.length && this.$refs.activities) {
-        let element = this.$refs.activities.$el
-        this.$nextTick(() => {
-          element.scrollTop = element.scrollHeight
-        })
-      }
     },
   },
 }
@@ -138,13 +86,13 @@ export default {
   top: 0;
   max-height: 100vh;
 }
-/deep/ .el-submenu__title {
+>>> .el-submenu__title {
   height: 2.5em;
   line-height: 2.5em;
   background-color: #f3f9ef;
   text-align: left;
 }
-/deep/ .el-menu:not(.el-menu--collapse) {
+>>> .el-menu:not(.el-menu--collapse) {
   width: 300px;
 }
 .submenu {

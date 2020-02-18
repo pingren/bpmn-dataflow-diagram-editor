@@ -6,7 +6,7 @@
     :step="0.001"
     :min="0.2"
     :max="4"
-    :format-tooltip="val => `${ (val*100).toFixed(0) }%` "
+    :format-tooltip="val => `${ (val * 100).toFixed(0) }%` "
     vertical
     height="200px"
     @input="slide"

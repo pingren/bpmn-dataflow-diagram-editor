@@ -1,7 +1,7 @@
 <template>
   <el-card
     class="left-pane"
-    :body-style="{ padding:'0', }"
+    :body-style="{ padding:'0' }"
   >
     <el-menu
       :default-openeds="['1','2']"
@@ -67,13 +67,13 @@ export default {
   top: 0;
   max-height: 100vh;
 }
-/deep/ .el-submenu__title {
+>>> .el-submenu__title {
   height: 2.5em;
   line-height: 2.5em;
   background-color: #f3f9ef;
   text-align: left;
 }
-/deep/ .el-menu:not(.el-menu--collapse) {
+>>> .el-menu:not(.el-menu--collapse) {
   width: 300px;
 }
 .submenu {
