@@ -8,8 +8,8 @@
       ref="content"
       style="height:calc(100vh - 72px);width:100%;"
       class="containers"
-      @dragover.stop="dragover_handler"
-      @drop.stop="drop_handler"
+      @dragover.stop="dragoverHandler"
+      @drop.stop="dropHandler"
     />
   </el-container>
 </template>
@@ -61,10 +61,10 @@ export default {
     getDiagram() {
       return this.diagram
     },
-    dragover_handler(event) {
+    dragoverHandler(event) {
       event.preventDefault()
     },
-    drop_handler(event) {
+    dropHandler(event) {
       event.preventDefault()
       if (!this.diagram.draggingNode) {
         return
