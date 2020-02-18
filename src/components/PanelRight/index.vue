@@ -85,6 +85,7 @@ export default {
   right: 0;
   top: 0;
   max-height: 100vh;
+  opacity: 0.9;
 }
 >>> .el-submenu__title {
   height: 2.5em;

@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div style="position:absolute;z-index:8;width:100%;">
     <el-card
       :body-style="{ padding: '5px' }"
-      style="z-index:8;width:auto;left:calc(50% - 350px);position:absolute;"
+      style="display: table;margin-right: auto;margin-left: auto;opacity: 0.9"
     >
       <el-button
         :disabled="!canUndo"

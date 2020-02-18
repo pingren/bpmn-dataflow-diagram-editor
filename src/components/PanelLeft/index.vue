@@ -65,6 +65,7 @@ export default {
   z-index: 9;
   left: 0;
   top: 0;
+  opacity: 0.9;
   max-height: 100vh;
 }
 >>> .el-submenu__title {
