@@ -1,13 +1,24 @@
 <template>
-  <el-tree
-    :data="data"
-    node-key="ID"
-    default-expand-all
-    draggable
-    :allow-drop="allowDrop"
-    :allow-drag="allowDrag"
-    @node-drag-start="handleDragStart"
-  />
+  <div>
+    <el-input
+      v-model="filterText"
+      prefix-icon="el-icon-search"
+      placeholder="算子名称"
+      size="mini"
+    />
+    <el-tree
+      ref="tree"
+      :filter-node-method="filterNode"
+      :data="data"
+      node-key="ID"
+      default-expand-all
+      draggable
+      :allow-drop="allowDrop"
+      :allow-drag="allowDrag"
+      @node-drag-start="handleDragStart"
+    />
+  </div>
+  </div>
 </template>
 
 <script>
@@ -55,9 +66,19 @@ export default {
         children: 'children',
         label: 'label',
       },
+      filterText: '',
     }
   },
+  watch: {
+    filterText(val) {
+      this.$refs.tree.filter(val)
+    },
+  },
   methods: {
+    filterNode(value, data) {
+      if (!value) return true
+      return data.label && data.label.indexOf(value) !== -1
+    },
     handleDragStart(node, ev) {
       node.data.type = 'bpmn:ScriptTask'
       this.diagram().setDraggingNode(node)
