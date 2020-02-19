@@ -148,7 +148,51 @@ export default class Diagram {
       })
     })
   }
-  exportXML(){
+  exportSVG(){
+    return new Promise(
+      (resolve, reject) => {
+        this.bpmnModeler.saveSVG({ format: true }, (err, svg) => {
+          if (err) {
+            reject(err)
+          }
+          resolve(svg)
+        })
+      }
+    )
+  }
+  exportSVGDataURL(){
+    return new Promise(
+      (resolve, reject) => {
+        this.exportSVG().then(svg => {
+          // don't use base64 encoded dataURL, since it won't support Chinese
+          let txt = svg.replace(/"/g, '\'')
+          .replace(/%/g, '%25')
+          .replace(/#/g, '%23')
+          .replace(/{/g, '%7B')
+          .replace(/}/g, '%7D')
+          .replace(/</g, '%3C')
+          .replace(/>/g, '%3E')
+          .replace(/\s+/g,' ')
+          .replace(/url\('(.*?)'\)/g,'$1')
+          // Chrome 79.0.3945.130 can not rendener marker-end: url('#sequenceflow-end-white-black-2mj337judsuz9qy2clgjk8nsd');"
+          // this regex is needed to remove those two single qutoes
+          //  .replace(/&/g, '%26')
+          //  .replace('|', '%7C')
+          //  .replace('[', '%5B')
+          //  .replace(']', '%5D')
+          //  .replace('^', '%5E')
+          //  .replace('`', '%60')
+          //  .replace(';', '%3B')
+          //  .replace('?', '%3F')
+          //  .replace(':', '%3A')
+          //  .replace('@', '%40')
+          //  .replace('=', '%3D')
+          resolve(`data:image/svg+xml,${txt}`)
+        }).catch(error => reject(error))
+      }
+    )
+  }
+  exportXML(isFormat = true){
     let rootNode = this.cli.element(processName).businessObject
     let viewbox = this.canvas.viewbox()
     rootNode.set('x', viewbox.x)
@@ -158,7 +202,7 @@ export default class Diagram {
     rootNode.set('scale', viewbox.scale)
     return new Promise(
       (resolve, reject) => {
-        this.bpmnModeler.saveXML({ format: true }, (err, xml) => {
+        this.bpmnModeler.saveXML({ format: isFormat }, (err, xml) => {
           if (err) {
             reject(err)
           }

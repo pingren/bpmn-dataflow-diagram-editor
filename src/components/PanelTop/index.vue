@@ -38,9 +38,16 @@
         size="mini"
         icon="el-icon-video-play"
         type="success"
-        @click="run"
       >
         Run 运行 (DEMO)
+      </el-button>
+      <el-button
+        size="mini"
+        icon="el-icon-document"
+        type="success"
+        @click="download"
+      >
+        Download SVG
       </el-button>
     </el-card>
     <div>
@@ -49,7 +56,7 @@
         :visible.sync="drawerVisible"
         :modal="false"
         size="30%"
-        :modal-append-to-body="false"
+        :append-to-body="true"
         :close-on-press-escape="false"
         custom-class="devdrawer"
       >
@@ -57,6 +64,11 @@
           Copy Content 复制内容
         </el-button>
         <pre>{{ drawerContent }}</pre>
+        <img
+          :src="svgDataURL"
+          width="300px"
+          height="300px"
+        ></img>
       </el-drawer>
     </div>
   </div>
@@ -68,6 +80,7 @@ export default {
     return {
       drawerVisible: false,
       drawerContent: undefined,
+      svgDataURL: undefined,
     }
   },
   computed: {
@@ -79,15 +92,39 @@ export default {
     },
   },
   methods: {
-    // TODO: animation & Logs
-    run() {},
+    download() {
+      this.diagram()
+        .exportSVG()
+        .then(svg => {
+          let blob = new Blob([svg], { type: 'image/svg+xml' })
+          var fileName =
+            Math.random(36)
+              .toString()
+              .substring(7) + '.svg'
+          var downloadLink = document.createElement('a')
+          downloadLink.download = fileName
+          downloadLink.innerHTML = 'Get BPMN SVG'
+          downloadLink.href = window.URL.createObjectURL(blob)
+          downloadLink.onclick = function(event) {
+            document.body.removeChild(event.target)
+          }
+          downloadLink.style.visibility = 'hidden'
+          document.head.appendChild(downloadLink)
+          downloadLink.click()
+        })
+    },
     // Saving DEMO
     save() {
       this.diagram()
         .exportXML()
         .then(xml => {
-          this.drawerVisible = true
-          this.drawerContent = xml
+          this.diagram()
+            .exportSVGDataURL()
+            .then(url => {
+              this.drawerVisible = true
+              this.drawerContent = xml
+              this.svgDataURL = url
+            })
         })
         .catch(_ => {
           this.$message.error('Failed!导出失败')
@@ -130,3 +167,9 @@ export default {
   },
 }
 </script>
+<style lang="css" scoped>
+/deep/ .devdrawer {
+  height: 100%;
+  overflow: auto;
+}
+</style>
