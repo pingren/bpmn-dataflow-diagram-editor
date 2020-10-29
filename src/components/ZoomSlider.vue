@@ -13,6 +13,7 @@
   />
 </template>
 <script>
+lint test
 export default {
   inject: ['diagram', 'key'],
   data: function() {
