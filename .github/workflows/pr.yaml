@@ -1,15 +1,21 @@
 name: CI
 on: [pull_request]
 jobs:
-  eslint:
-    name: ESLint Runner
+  ESLint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: bradennapier/eslint-plus-action@v3.4.2
+        with: 
+          issueSummaryType: full
+          issueSummary: false
+          extensions: .js,.jsx,.ts,.tsx,.vue
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
-      - run: cat ./src/main.js
       - run: yarn --frozen-lockfile
       - run: yarn build
