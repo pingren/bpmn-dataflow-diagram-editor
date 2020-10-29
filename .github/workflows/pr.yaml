@@ -1,30 +1,14 @@
 name: CI
 on: [pull_request]
 jobs:
-  eslint:
-    name: ESLint Runner
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: bradennapier/eslint-plus-action@v3.4.2
-        with: 
-          issueSummaryType: full
-          extensions: .js,.jsx,.ts,.tsx,.vue
-  eslint-reviewdog:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: reviewdog/action-eslint@v1
-        with:
-          reporter: github-pr-check
-          eslint_flags: '--ext .js,.ts,.vue'
   build:
-    name: Pre-merge Build 
+    name: Pre-merge 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-      - run: yarn --frozen-lockfile
+      - name: Install modules
+        run: yarn
+      - name: Run ESLint
+        run: yarn lint
+      - name: Build
       - run: yarn build
