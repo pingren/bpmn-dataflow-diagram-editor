@@ -6,6 +6,8 @@ import App from './App.vue'
 import './element-variables.scss'
 import store from './store'
 
+let a = 1;
+
 Vue.use(ElementUI, {
   locale,
 })
