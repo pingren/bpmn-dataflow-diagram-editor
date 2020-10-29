@@ -9,6 +9,10 @@ jobs:
       - name: Setup
         run: yarn
       - name: Lint
-        run: yarn lint
+        uses: wearerequired/lint-action@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          eslint: true
+          eslint_extensions: .js,.ts,.vue
       - name: Build
         run: yarn build
