@@ -7,9 +7,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: bradennapier/eslint-plus-action@v3.4.2
-      - name: Build Result
-        uses: actions/setup-node@v1
+      - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
+      - run: cat ./src/main.js
       - run: yarn --frozen-lockfile
       - run: yarn build
