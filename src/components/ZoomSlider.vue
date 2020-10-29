@@ -13,7 +13,7 @@
   />
 </template>
 <script>
-fail test
+
 export default {
   inject: ['diagram', 'key'],
   data: function() {

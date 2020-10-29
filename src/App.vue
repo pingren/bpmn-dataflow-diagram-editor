@@ -22,6 +22,8 @@
 <script>
 import DiagramEditor from './components/DiagramEditor'
 
+console.log(233);
+
 export default {
   name: 'App',
   components: {
