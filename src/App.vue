@@ -22,8 +22,6 @@
 <script>
 import DiagramEditor from './components/DiagramEditor'
 
-lint test
-
 export default {
   name: 'App',
   components: {
