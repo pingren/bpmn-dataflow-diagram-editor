@@ -1,7 +1,8 @@
 name: CI
 on: [pull_request]
 jobs:
-  Run ESLint:
+  eslint:
+    name: ESLint Runner
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -10,7 +11,8 @@ jobs:
           issueSummaryType: full
           issueSummary: false
           extensions: .js,.jsx,.ts,.tsx,.vue
-  Pre Build:
+  build:
+    name: Pre-merge Build 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
