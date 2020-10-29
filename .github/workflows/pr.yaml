@@ -13,6 +13,6 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           eslint: true
-          eslint_extensions: .js,.ts,.vue
+          eslint_extensions: js,ts,vue
       - name: Build
         run: yarn build
