@@ -14,6 +14,7 @@
   </el-container>
 </template>
 <script>
+
 import PanelLeft from './PanelLeft'
 import PanelRight from './PanelRight'
 import PanelTop from './PanelTop'
